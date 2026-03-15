@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timetable - APNA SCHOOL</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .timetable-cell {
+            min-height: 80px;
+            padding: var(--space-2);
+            cursor: pointer;
+            transition: var(--transition-base);
+            position: relative;
+        }
+
+        .timetable-cell:hover {
+            background: rgba(90, 63, 255, 0.1);
+        }
+
+        .timetable-cell.break-cell {
+            background: linear-gradient(135deg, rgba(90, 63, 255, 0.1), rgba(77, 227, 255, 0.1));
+            cursor: default;
+        }
+
+        .subject-chip {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: var(--space-2);
+            border-radius: var(--radius-lg);
+            text-align: center;
+        }
+
+        .subject-chip .icon {
+            font-size: 1.5rem;
+        }
+
+        .subject-chip .name {
+            font-size: var(--text-xs);
+            font-weight: 600;
+        }
+
+        .subject-chip .teacher {
+            font-size: 10px;
+            color: #666;
+        }
+
+        .add-slot {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 60px;
+            color: #999;
+            font-size: 1.5rem;
+        }
+
+        .add-slot:hover {
+            color: var(--color-royal-indigo);
+        }
+
+        .period-header {
+            text-align: center;
+            padding: var(--space-2);
+        }
+
+        .period-header .num {
+            font-weight: bold;
+            color: var(--color-royal-indigo);
+        }
+
+        .period-header .time {
+            font-size: var(--text-xs);
+            color: #666;
+        }
+
+        .period-settings {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: var(--space-4);
+        }
+
+        .period-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: var(--space-4);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .period-card.break {
+            background: linear-gradient(135deg, rgba(255, 140, 66, 0.1), rgba(255, 90, 90, 0.1));
+            border: 1px dashed var(--color-warning);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="animated-bg">
+        <div class="floating-shapes">
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+        </div>
+    </div>
+
+    <nav class="navbar">
+        <a href="index.html" class="navbar-brand">🎓 APNA SCHOOL</a>
+        <button class="menu-toggle" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
+        <ul class="navbar-nav">
+            <li><button class="btn btn-glass btn-sm" onclick="Auth.logout()">Logout</button></li>
+        </ul>
+    </nav>
+
+    <aside class="sidebar" id="sidebar">
+        <nav class="sidebar-nav">
+            <a href="admin-dashboard.html" class="sidebar-link"><span class="sidebar-icon">📊</span> Dashboard</a>
+            <a href="students.html" class="sidebar-link"><span class="sidebar-icon">👨‍🎓</span> Students</a>
+            <a href="faculty.html" class="sidebar-link"><span class="sidebar-icon">👨‍🏫</span> Faculty</a>
+            <a href="subjects.html" class="sidebar-link"><span class="sidebar-icon">📚</span> Subjects</a>
+            <a href="attendance.html" class="sidebar-link"><span class="sidebar-icon">📅</span> Attendance</a>
+            <a href="marks.html" class="sidebar-link"><span class="sidebar-icon">📝</span> Marks</a>
+            <a href="fees.html" class="sidebar-link"><span class="sidebar-icon">💰</span> Fees</a>
+            <a href="circulars.html" class="sidebar-link"><span class="sidebar-icon">📢</span> Circulars</a>
+            <a href="timetable.html" class="sidebar-link active"><span class="sidebar-icon">📆</span> Timetable</a>
+            <a href="settings.html" class="sidebar-link"><span class="sidebar-icon">⚙️</span> Settings</a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header flex justify-between items-center">
+            <div>
+                <h1 class="page-title">Timetable Management</h1>
+                <p class="page-subtitle">Create and manage class schedules.</p>
+            </div>
+            <div class="flex gap-2">
+                <select class="form-control" id="classSelect" style="width: auto;" onchange="loadTimetable()">
+                    <option value="">Select Class</option>
+                </select>
+                <button class="btn btn-glass" onclick="showPeriodSettings()">⚙️ Period Settings</button>
+                <button class="btn btn-primary" onclick="saveTimetable()">💾 Save</button>
+            </div>
+        </div>
+
+        <!-- Timetable Grid -->
+        <div class="card">
+            <div class="table-container" style="box-shadow: none; overflow-x: auto;">
+                <table class="data-table" id="timetableTable">
+                    <thead>
+                        <tr>
+                            <th style="width: 100px;">Period</th>
+                            <th>Monday</th>
+                            <th>Tuesday</th>
+                            <th>Wednesday</th>
+                            <th>Thursday</th>
+                            <th>Friday</th>
+                            <th>Saturday</th>
+                        </tr>
+                    </thead>
+                    <tbody id="timetableBody">
+                        <tr>
+                            <td colspan="7" class="text-muted text-center">Select a class to view/edit timetable</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Legend -->
+        <div class="card mt-6">
+            <h4 class="mb-4">📚 Subject Legend</h4>
+            <div class="flex flex-wrap gap-4" id="subjectLegend"></div>
+        </div>
+    </main>
+
+    <!-- Edit Slot Modal -->
+    <div class="modal-backdrop" id="slotModal">
+        <div class="modal" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Edit Period</h3>
+                <button class="modal-close" onclick="closeSlotModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="slotDay">
+                <input type="hidden" id="slotPeriod">
+                <div class="form-group">
+                    <label class="form-label">Subject</label>
+                    <select class="form-control" id="slotSubject">
+                        <option value="">-- No Class --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Teacher</label>
+                    <select class="form-control" id="slotTeacher">
+                        <option value="">-- Select Teacher --</option>
+                    </select>
+                </div>
+                <div class="modal-footer" style="padding: 0; border: none; margin-top: var(--space-4);">
+                    <button class="btn btn-glass" onclick="closeSlotModal()">Cancel</button>
+                    <button class="btn btn-danger" onclick="clearSlot()">Clear</button>
+                    <button class="btn btn-primary" onclick="saveSlot()">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Period Settings Modal -->
+    <div class="modal-backdrop" id="periodModal">
+        <div class="modal" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3 class="modal-title">⚙️ Period Settings</h3>
+                <button class="modal-close" onclick="closePeriodModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted mb-4">Configure period timings and breaks for all classes.</p>
+                <div class="period-settings" id="periodSettingsGrid"></div>
+                <div class="modal-footer" style="padding: 0; border: none; margin-top: var(--space-6);">
+                    <button class="btn btn-glass" onclick="addPeriod()">➕ Add Period</button>
+                    <button class="btn btn-warning" onclick="addBreak()">☕ Add Break</button>
+                    <button class="btn btn-primary" onclick="savePeriodSettings()">💾 Save Settings</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/db.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/schema.js"></script>
+    <script>
+        let periods = [
+            { id: 1, type: 'class', time: '9:00 - 9:45' },
+            { id: 2, type: 'class', time: '9:45 - 10:30' },
+            { id: 'b1', type: 'break', name: 'Short Break', time: '10:30 - 10:45' },
+            { id: 3, type: 'class', time: '10:45 - 11:30' },
+            { id: 4, type: 'class', time: '11:30 - 12:15' },
+            { id: 5, type: 'class', time: '12:15 - 1:00' },
+            { id: 'b2', type: 'break', name: 'Lunch Break', time: '1:00 - 1:45' },
+            { id: 6, type: 'class', time: '1:45 - 2:30' },
+            { id: 7, type: 'class', time: '2:30 - 3:15' },
+            { id: 8, type: 'class', time: '3:15 - 4:00' }
+        ];
+
+        const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+        const subjectColors = {
+            'sub_math': '#5A3FFF', 'sub_science': '#00D9A5', 'sub_english': '#4DE3FF',
+            'sub_social': '#CFA7FF', 'sub_hindi': '#FFB84D', 'sub_computer': '#FF5A5A',
+            'sub_physics': '#00B88A', 'sub_chemistry': '#FF8C42', 'sub_biology': '#9B59B6'
+        };
+
+        let timetableData = {};
+        let subjects = [];
+        let faculty = [];
+        let classes = [];
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!Auth.requireRole(['admin', 'faculty', 'developer'])) return;
+            await DB.ready();
+
+            subjects = await DB.getAll('subjects');
+            faculty = await DB.getAll('faculty');
+            classes = await DB.getAll('classes');
+
+            // Populate class dropdown
+            const classSelect = document.getElementById('classSelect');
+            classSelect.innerHTML = '<option value="">Select Class</option>' +
+                classes.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+
+            // Populate subject dropdown
+            const subjectSelect = document.getElementById('slotSubject');
+            subjectSelect.innerHTML = '<option value="">-- No Class --</option>' +
+                subjects.map(s => `<option value="${s.id}">${s.icon} ${s.name}</option>`).join('');
+
+            // Populate teacher dropdown
+            const teacherSelect = document.getElementById('slotTeacher');
+            teacherSelect.innerHTML = '<option value="">-- Select Teacher --</option>' +
+                faculty.map(f => `<option value="${f.id}">${f.name}</option>`).join('');
+
+            renderLegend();
+        });
+
+        async function loadTimetable() {
+            const classId = document.getElementById('classSelect').value;
+            if (!classId) return;
+
+            // Try to load from DB
+            const allTimetables = await DB.getAll('timetable');
+            const classTimetable = allTimetables.find(t => t.classId === classId);
+
+            timetableData = classTimetable?.slots || {};
+            renderTimetable();
+        }
+
+        function renderTimetable() {
+            const tbody = document.getElementById('timetableBody');
+
+            tbody.innerHTML = periods.map(period => {
+                if (period.type === 'break') {
+                    return `
+            <tr>
+              <td colspan="7" class="timetable-cell break-cell" style="text-align: center;">
+                ☕ <strong>${period.name}</strong> (${period.time})
+              </td>
+            </tr>
+          `;
+                }
+
+                return `
+          <tr>
+            <td class="period-header">
+              <div class="num">Period ${period.id}</div>
+              <div class="time">${period.time}</div>
+            </td>
+            ${days.map(day => {
+                    const key = `${day}_${period.id}`;
+                    const slot = timetableData[key];
+                    const subject = slot ? subjects.find(s => s.id === slot.subjectId) : null;
+                    const teacher = slot ? faculty.find(f => f.id === slot.facultyId) : null;
+                    const color = subjectColors[slot?.subjectId] || '#e0e0e0';
+
+                    return `
+                <td class="timetable-cell" onclick="editSlot('${day}', ${period.id})">
+                  ${subject ? `
+                    <div class="subject-chip" style="background: ${color}15; border-left: 3px solid ${color};">
+                      <span class="icon">${subject.icon}</span>
+                      <span class="name">${subject.name}</span>
+                      <span class="teacher">${teacher?.name || ''}</span>
+                    </div>
+                  ` : `
+                    <div class="add-slot">+</div>
+                  `}
+                </td>
+              `;
+                }).join('')}
+          </tr>
+        `;
+            }).join('');
+        }
+
+        function editSlot(day, periodId) {
+            document.getElementById('slotDay').value = day;
+            document.getElementById('slotPeriod').value = periodId;
+
+            const key = `${day}_${periodId}`;
+            const slot = timetableData[key];
+
+            document.getElementById('slotSubject').value = slot?.subjectId || '';
+            document.getElementById('slotTeacher').value = slot?.facultyId || '';
+
+            document.getElementById('slotModal').classList.add('active');
+        }
+
+        function closeSlotModal() {
+            document.getElementById('slotModal').classList.remove('active');
+        }
+
+        function saveSlot() {
+            const day = document.getElementById('slotDay').value;
+            const periodId = document.getElementById('slotPeriod').value;
+            const subjectId = document.getElementById('slotSubject').value;
+            const facultyId = document.getElementById('slotTeacher').value;
+
+            const key = `${day}_${periodId}`;
+
+            if (subjectId) {
+                timetableData[key] = { subjectId, facultyId };
+            } else {
+                delete timetableData[key];
+            }
+
+            closeSlotModal();
+            renderTimetable();
+            Utils.showToast('Slot updated', 'success');
+        }
+
+        function clearSlot() {
+            const day = document.getElementById('slotDay').value;
+            const periodId = document.getElementById('slotPeriod').value;
+            const key = `${day}_${periodId}`;
+            delete timetableData[key];
+            closeSlotModal();
+            renderTimetable();
+            Utils.showToast('Slot cleared', 'info');
+        }
+
+        async function saveTimetable() {
+            const classId = document.getElementById('classSelect').value;
+            if (!classId) {
+                Utils.showToast('Please select a class first', 'warning');
+                return;
+            }
+
+            const user = Auth.currentUser();
+
+            // Check if timetable exists
+            const allTimetables = await DB.getAll('timetable');
+            const existing = allTimetables.find(t => t.classId === classId);
+
+            if (existing) {
+                await DB.update('timetable', {
+                    ...existing,
+                    slots: timetableData,
+                    updatedBy: user?.userId,
+                    updatedAt: new Date().toISOString()
+                }, user?.userId);
+            } else {
+                await DB.add('timetable', {
+                    classId,
+                    slots: timetableData,
+                    createdBy: user?.userId
+                }, user?.userId);
+            }
+
+            Utils.showToast('Timetable saved successfully!', 'success');
+        }
+
+        function showPeriodSettings() {
+            const grid = document.getElementById('periodSettingsGrid');
+            grid.innerHTML = periods.map((p, i) => `
+        <div class="period-card ${p.type === 'break' ? 'break' : ''}">
+          <div class="flex justify-between items-center mb-2">
+            <strong>${p.type === 'break' ? '☕ ' + p.name : 'Period ' + p.id}</strong>
+            <button class="btn btn-sm btn-danger" onclick="removePeriod(${i})">🗑️</button>
+          </div>
+          <input type="text" class="form-control" value="${p.time}" onchange="updatePeriodTime(${i}, this.value)" placeholder="e.g., 9:00 - 9:45">
+          ${p.type === 'break' ? `<input type="text" class="form-control mt-2" value="${p.name}" onchange="updateBreakName(${i}, this.value)" placeholder="Break name">` : ''}
+        </div>
+      `).join('');
+            document.getElementById('periodModal').classList.add('active');
+        }
+
+        function closePeriodModal() {
+            document.getElementById('periodModal').classList.remove('active');
+        }
+
+        function updatePeriodTime(index, value) {
+            periods[index].time = value;
+        }
+
+        function updateBreakName(index, value) {
+            periods[index].name = value;
+        }
+
+        function addPeriod() {
+            const classPeriods = periods.filter(p => p.type === 'class');
+            const maxId = Math.max(...classPeriods.map(p => p.id));
+            periods.push({ id: maxId + 1, type: 'class', time: 'TBD' });
+            showPeriodSettings();
+        }
+
+        function addBreak() {
+            const breaks = periods.filter(p => p.type === 'break');
+            periods.push({ id: `b${breaks.length + 1}`, type: 'break', name: 'Break', time: 'TBD' });
+            showPeriodSettings();
+        }
+
+        function removePeriod(index) {
+            periods.splice(index, 1);
+            showPeriodSettings();
+        }
+
+        function savePeriodSettings() {
+            closePeriodModal();
+            renderTimetable();
+            Utils.showToast('Period settings updated', 'success');
+        }
+
+        function renderLegend() {
+            const legend = document.getElementById('subjectLegend');
+            legend.innerHTML = subjects.map(s => {
+                const color = subjectColors[s.id] || '#999';
+                return `
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="width: 16px; height: 16px; background: ${color}; border-radius: 4px;"></span>
+            <span>${s.icon} ${s.name}</span>
+          </div>
+        `;
+            }).join('');
+        }
+    </script>
+</body>
+
+</html>

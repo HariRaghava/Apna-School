@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty Management - APNA SCHOOL</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <div class="animated-bg">
+        <div class="floating-shapes">
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+        </div>
+    </div>
+
+    <nav class="navbar">
+        <a href="index.html" class="navbar-brand">🎓 APNA SCHOOL</a>
+        <button class="menu-toggle" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
+        <ul class="navbar-nav">
+            <li><button class="btn btn-glass btn-sm" onclick="Auth.logout()">Logout</button></li>
+        </ul>
+    </nav>
+
+    <aside class="sidebar" id="sidebar">
+        <nav class="sidebar-nav">
+            <a href="admin-dashboard.html" class="sidebar-link"><span class="sidebar-icon">📊</span> Dashboard</a>
+            <a href="students.html" class="sidebar-link"><span class="sidebar-icon">👨‍🎓</span> Students</a>
+            <a href="faculty.html" class="sidebar-link active"><span class="sidebar-icon">👨‍🏫</span> Faculty</a>
+            <a href="attendance.html" class="sidebar-link"><span class="sidebar-icon">📅</span> Attendance</a>
+            <a href="marks.html" class="sidebar-link"><span class="sidebar-icon">📝</span> Marks</a>
+            <a href="fees.html" class="sidebar-link"><span class="sidebar-icon">💰</span> Fees</a>
+            <a href="timetable.html" class="sidebar-link"><span class="sidebar-icon">📆</span> Timetable</a>
+            <a href="settings.html" class="sidebar-link"><span class="sidebar-icon">⚙️</span> Settings</a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header flex justify-between items-center">
+            <div>
+                <h1 class="page-title">Faculty Management</h1>
+                <p class="page-subtitle">Add and manage faculty members.</p>
+            </div>
+            <button class="btn btn-primary" onclick="openModal()">➕ Add Faculty</button>
+        </div>
+
+        <!-- Search -->
+        <div class="card mb-6">
+            <input type="text" class="form-control" id="searchInput" placeholder="🔍 Search faculty..."
+                style="max-width: 400px;" oninput="filterFaculty()">
+        </div>
+
+        <!-- Faculty Grid -->
+        <div class="grid grid-3 gap-6" id="facultyGrid">
+            <p class="text-muted">Loading...</p>
+        </div>
+    </main>
+
+    <!-- Add/Edit Modal -->
+    <div class="modal-backdrop" id="facultyModal">
+        <div class="modal" style="max-width: 550px;">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Add Faculty</h3>
+                <button class="modal-close" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="facultyForm" onsubmit="saveFaculty(event)">
+                    <input type="hidden" id="facultyId">
+                    <div class="form-group">
+                        <label class="form-label">Full Name *</label>
+                        <input type="text" class="form-control" id="name" required>
+                    </div>
+                    <div class="grid grid-2 gap-4">
+                        <div class="form-group">
+                            <label class="form-label">Email *</label>
+                            <input type="email" class="form-control" id="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Phone *</label>
+                            <input type="tel" class="form-control" id="phone" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Subjects *</label>
+                        <div id="subjectCheckboxes" class="grid grid-2 gap-2"
+                            style="background: rgba(0,0,0,0.03); padding: var(--space-4); border-radius: var(--radius-md);">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Qualification</label>
+                        <input type="text" class="form-control" id="qualification" placeholder="e.g., M.Sc., B.Ed.">
+                    </div>
+                    <div class="modal-footer" style="border: none; padding: 0; margin-top: var(--space-4);">
+                        <button type="button" class="btn btn-glass" onclick="closeModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Faculty</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/db.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/utils.js"></script>
+    <script>
+        let allFaculty = [];
+        let allSubjects = [];
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!Auth.requireRole(['admin', 'developer'])) return;
+            await loadData();
+        });
+
+        async function loadData() {
+            await DB.ready();
+            allFaculty = await DB.getAll('faculty');
+            allSubjects = await DB.getAll('subjects');
+            displayFaculty(allFaculty);
+            renderSubjectCheckboxes();
+        }
+
+        function renderSubjectCheckboxes(selected = []) {
+            const container = document.getElementById('subjectCheckboxes');
+            container.innerHTML = allSubjects.map(s => `
+        <label style="display: flex; align-items: center; gap: var(--space-2); cursor: pointer;">
+          <input type="checkbox" name="subjects" value="${s.id}" ${selected.includes(s.id) ? 'checked' : ''}>
+          ${s.icon} ${s.name}
+        </label>
+      `).join('');
+        }
+
+        function displayFaculty(faculty) {
+            const grid = document.getElementById('facultyGrid');
+
+            if (faculty.length === 0) {
+                grid.innerHTML = '<p class="text-muted" style="grid-column: span 3;">No faculty found. Click "Add Faculty" to get started.</p>';
+                return;
+            }
+
+            grid.innerHTML = faculty.map(f => {
+                const subjects = (f.subjects || []).map(sId => {
+                    const s = allSubjects.find(x => x.id === sId);
+                    return s ? `<span class="badge badge-primary" style="margin: 2px;">${s.icon} ${s.name}</span>` : '';
+                }).join('');
+
+                return `
+          <div class="card">
+            <div style="display: flex; gap: var(--space-4); margin-bottom: var(--space-4);">
+              <div style="width: 60px; height: 60px; background: linear-gradient(135deg, var(--color-royal-indigo), var(--color-aqua-glow)); border-radius: var(--radius-full); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; font-weight: bold;">
+                ${Utils.getInitials(f.name)}
+              </div>
+              <div>
+                <h3 style="margin: 0; font-size: var(--text-lg);">${f.name}</h3>
+                <p style="color: #666; font-size: var(--text-sm);">${f.qualification || 'Teacher'}</p>
+              </div>
+            </div>
+            <div style="margin-bottom: var(--space-4);">
+              <p style="font-size: var(--text-sm); color: #666;">📧 ${f.email}</p>
+              <p style="font-size: var(--text-sm); color: #666;">📞 ${f.phone}</p>
+            </div>
+            <div style="margin-bottom: var(--space-4);">
+              ${subjects || '<span class="text-muted">No subjects assigned</span>'}
+            </div>
+            <div style="display: flex; gap: var(--space-2);">
+              <button class="btn btn-sm btn-glass" onclick="editFaculty('${f.id}')">✏️ Edit</button>
+              <button class="btn btn-sm btn-danger" onclick="deleteFaculty('${f.id}')">🗑️ Delete</button>
+            </div>
+          </div>
+        `;
+            }).join('');
+        }
+
+        function filterFaculty() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allFaculty.filter(f =>
+                f.name.toLowerCase().includes(search) ||
+                f.email.toLowerCase().includes(search)
+            );
+            displayFaculty(filtered);
+        }
+
+        function openModal(isEdit = false) {
+            document.getElementById('facultyModal').classList.add('active');
+            document.getElementById('modalTitle').textContent = isEdit ? 'Edit Faculty' : 'Add Faculty';
+            if (!isEdit) {
+                document.getElementById('facultyForm').reset();
+                document.getElementById('facultyId').value = '';
+                renderSubjectCheckboxes([]);
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('facultyModal').classList.remove('active');
+        }
+
+        async function editFaculty(id) {
+            const faculty = await DB.get('faculty', id);
+            if (!faculty) return;
+
+            document.getElementById('facultyId').value = faculty.id;
+            document.getElementById('name').value = faculty.name;
+            document.getElementById('email').value = faculty.email;
+            document.getElementById('phone').value = faculty.phone;
+            document.getElementById('qualification').value = faculty.qualification || '';
+            renderSubjectCheckboxes(faculty.subjects || []);
+
+            openModal(true);
+        }
+
+        async function saveFaculty(e) {
+            e.preventDefault();
+
+            const id = document.getElementById('facultyId').value;
+            const isEdit = Boolean(id);
+
+            const selectedSubjects = Array.from(document.querySelectorAll('input[name="subjects"]:checked'))
+                .map(cb => cb.value);
+
+            const facultyData = {
+                id: id || DB.generateId('fac'),
+                name: document.getElementById('name').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                phone: document.getElementById('phone').value.trim(),
+                qualification: document.getElementById('qualification').value.trim(),
+                subjects: selectedSubjects,
+                assignedClasses: ['9A', '10A', '10B']
+            };
+
+            if (!facultyData.name || !facultyData.email || !facultyData.phone) {
+                Utils.showToast('Please fill all required fields', 'error');
+                return;
+            }
+
+            try {
+                if (isEdit) {
+                    await DB.update('faculty', facultyData);
+                    Utils.showToast('Faculty updated successfully', 'success');
+                } else {
+                    await DB.add('faculty', facultyData);
+
+                    // Create user account
+                    const username = facultyData.email.split('@')[0].toLowerCase();
+                    await Auth.createUser({
+                        username: username,
+                        password: 'faculty123',
+                        name: facultyData.name,
+                        role: 'faculty',
+                        linkedId: facultyData.id,
+                        email: facultyData.email
+                    });
+
+                    Utils.showToast('Faculty added with login: ' + username + ' / faculty123', 'success');
+                }
+
+                closeModal();
+                await loadData();
+            } catch (error) {
+                console.error(error);
+                Utils.showToast('Error saving faculty', 'error');
+            }
+        }
+
+        async function deleteFaculty(id) {
+            const confirm = await Utils.confirm('Are you sure you want to delete this faculty member?', 'Delete Faculty');
+            if (confirm) {
+                await DB.delete('faculty', id);
+
+                // Delete user account
+                const users = await DB.getAll('users');
+                for (const u of users) {
+                    if (u.linkedId === id) {
+                        await DB.delete('users', u.id);
+                    }
+                }
+
+                Utils.showToast('Faculty deleted', 'success');
+                await loadData();
+            }
+        }
+    </script>
+</body>
+
+</html>

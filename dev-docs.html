@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Developer Documentation - APNA SCHOOL</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0A0F2C 0%, #1a1a2e 50%, #16213e 100%);
+        }
+
+        .doc-section {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-xl);
+            padding: var(--space-6);
+            margin-bottom: var(--space-6);
+        }
+
+        .doc-section h3 {
+            color: var(--color-aqua-glow);
+            margin-bottom: var(--space-4);
+        }
+
+        pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: var(--space-4);
+            border-radius: var(--radius-md);
+            overflow-x: auto;
+            color: var(--color-aqua-glow);
+            font-size: var(--text-sm);
+        }
+
+        code {
+            font-family: var(--font-mono);
+        }
+
+        .api-method {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: var(--text-xs);
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        .api-get {
+            background: var(--color-success);
+            color: white;
+        }
+
+        .api-post {
+            background: var(--color-info);
+            color: white;
+        }
+
+        .api-put {
+            background: var(--color-warning);
+            color: var(--color-midnight);
+        }
+
+        .api-delete {
+            background: var(--color-danger);
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="animated-bg">
+        <div class="floating-shapes">
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+        </div>
+    </div>
+
+    <nav class="navbar">
+        <a href="index.html" class="navbar-brand">🎓 APNA SCHOOL</a>
+        <ul class="navbar-nav">
+            <li><a href="index.html" class="nav-link">Home</a></li>
+            <li><a href="login.html" class="btn btn-accent btn-sm">Login</a></li>
+        </ul>
+    </nav>
+
+    <main class="main-content no-sidebar" style="margin-top: 100px;">
+        <div class="container" style="max-width: 900px;">
+            <div class="text-center mb-8">
+                <h1 style="font-size: var(--text-4xl); color: var(--color-aqua-glow); margin-bottom: var(--space-4);">💻
+                    Developer Documentation</h1>
+                <p style="color: rgba(255,255,255,0.7);">Technical guide for the APNA SCHOOL Management System</p>
+            </div>
+
+            <!-- Architecture -->
+            <div class="doc-section">
+                <h3>📚 Project Architecture</h3>
+                <pre>
+APNA SCHOOL/
+├── index.html              # Landing page
+├── login.html              # Multi-role authentication
+├── admin-dashboard.html    # Admin portal
+├── student-dashboard.html  # Student view
+├── faculty-dashboard.html  # Teacher portal
+├── parent-dashboard.html   # Guardian access
+├── developer-dashboard.html # System tools
+├── students.html           # Student CRUD
+├── faculty.html            # Faculty CRUD
+├── attendance.html         # Attendance tracking
+├── marks.html              # Marks & PDF export
+├── fees.html               # Fee management
+├── timetable.html          # Class schedules
+├── settings.html           # Configuration
+├── css/
+│   ├── tokens.css          # Design variables
+│   └── styles.css          # Main styles
+└── js/
+    ├── db.js               # IndexedDB wrapper
+    ├── auth.js             # Authentication
+    ├── utils.js            # Utilities
+    ├── seed.js             # Demo data
+    ├── admin.js            # Admin logic
+    └── student.js          # Student CRUD
+        </pre>
+            </div>
+
+            <!-- Database API -->
+            <div class="doc-section">
+                <h3>💾 Database API (db.js)</h3>
+                <p style="color: rgba(255,255,255,0.7); margin-bottom: var(--space-4);">IndexedDB wrapper for all data
+                    operations.</p>
+
+                <div style="margin-bottom: var(--space-4);">
+                    <span class="api-method api-get">INIT</span>
+                    <code style="color: white;">DB.ready()</code>
+                    <p style="color: #888; font-size: var(--text-sm); margin-top: 4px;">Initialize database connection.
+                        Auto-creates stores.</p>
+                </div>
+
+                <div style="margin-bottom: var(--space-4);">
+                    <span class="api-method api-post">CREATE</span>
+                    <code style="color: white;">DB.add(storeName, data)</code>
+                    <p style="color: #888; font-size: var(--text-sm); margin-top: 4px;">Add new record. Auto-generates
+                        ID if not provided.</p>
+                </div>
+
+                <div style="margin-bottom: var(--space-4);">
+                    <span class="api-method api-get">READ</span>
+                    <code style="color: white;">DB.get(storeName, id)</code>
+                    <p style="color: #888; font-size: var(--text-sm); margin-top: 4px;">Get record by ID.</p>
+                </div>
+
+                <div style="margin-bottom: var(--space-4);">
+                    <span class="api-method api-get">READ ALL</span>
+                    <code style="color: white;">DB.getAll(storeName)</code>
+                    <p style="color: #888; font-size: var(--text-sm); margin-top: 4px;">Get all records from a store.
+                    </p>
+                </div>
+
+                <div style="margin-bottom: var(--space-4);">
+                    <span class="api-method api-put">UPDATE</span>
+                    <code style="color: white;">DB.update(storeName, data)</code>
+                    <p style="color: #888; font-size: var(--text-sm); margin-top: 4px;">Update existing record.</p>
+                </div>
+
+                <div style="margin-bottom: var(--space-4);">
+                    <span class="api-method api-delete">DELETE</span>
+                    <code style="color: white;">DB.delete(storeName, id)</code>
+                    <p style="color: #888; font-size: var(--text-sm); margin-top: 4px;">Remove record by ID.</p>
+                </div>
+
+                <pre>
+// Example Usage
+await DB.ready();
+await DB.add('students', { name: 'John', class: '10A' });
+const students = await DB.getAll('students');
+        </pre>
+            </div>
+
+            <!-- Auth API -->
+            <div class="doc-section">
+                <h3>🔐 Authentication API (auth.js)</h3>
+                <p style="color: rgba(255,255,255,0.7); margin-bottom: var(--space-4);">SHA-256 password hashing with
+                    session management.</p>
+
+                <pre>
+// Login
+const result = await Auth.login(username, password, role);
+if (result.success) {
+  Auth.redirectToDashboard(role);
+}
+
+// Check auth
+if (!Auth.isLoggedIn()) { /* redirect */ }
+Auth.requireRole(['admin', 'developer']);
+
+// Get current user
+const user = Auth.currentUser();
+// { userId, username, name, role, linkedId }
+
+// Logout
+Auth.logout();
+        </pre>
+            </div>
+
+            <!-- Data Stores -->
+            <div class="doc-section">
+                <h3>📊 Database Stores</h3>
+                <div class="grid grid-2 gap-4">
+                    <div style="background: rgba(0,0,0,0.2); padding: var(--space-4); border-radius: var(--radius-md);">
+                        <h4 style="color: var(--color-aqua-glow);">users</h4>
+                        <code
+                            style="color: #888; font-size: var(--text-xs);">{ id, username, passwordHash, role, name, linkedId }</code>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.2); padding: var(--space-4); border-radius: var(--radius-md);">
+                        <h4 style="color: var(--color-aqua-glow);">students</h4>
+                        <code
+                            style="color: #888; font-size: var(--text-xs);">{ id, name, rollNo, class, dob, guardianName, phone }</code>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.2); padding: var(--space-4); border-radius: var(--radius-md);">
+                        <h4 style="color: var(--color-aqua-glow);">faculty</h4>
+                        <code
+                            style="color: #888; font-size: var(--text-xs);">{ id, name, email, phone, subjects[], assignedClasses[] }</code>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.2); padding: var(--space-4); border-radius: var(--radius-md);">
+                        <h4 style="color: var(--color-aqua-glow);">attendance</h4>
+                        <code
+                            style="color: #888; font-size: var(--text-xs);">{ id, studentId, date, status, classId, markedBy }</code>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.2); padding: var(--space-4); border-radius: var(--radius-md);">
+                        <h4 style="color: var(--color-aqua-glow);">marks</h4>
+                        <code
+                            style="color: #888; font-size: var(--text-xs);">{ id, studentId, subjectId, examType, marks, maxMarks }</code>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.2); padding: var(--space-4); border-radius: var(--radius-md);">
+                        <h4 style="color: var(--color-aqua-glow);">fees</h4>
+                        <code
+                            style="color: #888; font-size: var(--text-xs);">{ id, studentId, totalAmount, paidAmount, balance, status }</code>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Technologies -->
+            <div class="doc-section">
+                <h3>🛠️ Technologies Used</h3>
+                <div class="grid grid-3 gap-4 text-center">
+                    <div style="background: rgba(0,0,0,0.2); padding: var(--space-4); border-radius: var(--radius-md);">
+                        <div style="font-size: 2rem; margin-bottom: var(--space-2);">🌐</div>
+                        <strong style="color: white;">HTML5</strong>
+                        <p style="color: #888; font-size: var(--text-xs);">Semantic markup</p>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.2); padding: var(--space-4); border-radius: var(--radius-md);">
+                        <div style="font-size: 2rem; margin-bottom: var(--space-2);">🎨</div>
+                        <strong style="color: white;">CSS3</strong>
+                        <p style="color: #888; font-size: var(--text-xs);">Glassmorphism design</p>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.2); padding: var(--space-4); border-radius: var(--radius-md);">
+                        <div style="font-size: 2rem; margin-bottom: var(--space-2);">⚡</div>
+                        <strong style="color: white;">JavaScript ES6+</strong>
+                        <p style="color: #888; font-size: var(--text-xs);">Vanilla JS, no frameworks</p>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.2); padding: var(--space-4); border-radius: var(--radius-md);">
+                        <div style="font-size: 2rem; margin-bottom: var(--space-2);">💾</div>
+                        <strong style="color: white;">IndexedDB</strong>
+                        <p style="color: #888; font-size: var(--text-xs);">Local database</p>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.2); padding: var(--space-4); border-radius: var(--radius-md);">
+                        <div style="font-size: 2rem; margin-bottom: var(--space-2);">🔒</div>
+                        <strong style="color: white;">Web Crypto</strong>
+                        <p style="color: #888; font-size: var(--text-xs);">SHA-256 hashing</p>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.2); padding: var(--space-4); border-radius: var(--radius-md);">
+                        <div style="font-size: 2rem; margin-bottom: var(--space-2);">📱</div>
+                        <strong style="color: white;">Responsive</strong>
+                        <p style="color: #888; font-size: var(--text-xs);">Mobile-first design</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Team -->
+            <div class="doc-section">
+                <h3>👥 Development Team</h3>
+                <div style="color: rgba(255,255,255,0.7);">
+                    <p><strong>Mohamed Fazil Pasha</strong> - Full Stack Developer</p>
+                    <p><strong>Jeevan MN</strong> - Frontend Developer</p>
+                    <p><strong>Shanthanu Kyashup</strong> - Backend Developer</p>
+                    <p><strong>Arun Kumar</strong> - UI/UX Designer</p>
+                    <p style="margin-top: var(--space-4); color: #888;">Under the guidance of <strong>Prof. Gangutai
+                            Uramanatti</strong><br>Siddaganga Institute of Technology</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer
+        style="background: rgba(10, 15, 44, 0.95); padding: var(--space-8); text-align: center; color: rgba(255,255,255,0.5); margin-top: var(--space-12);">
+        <p>Version 3.0 Crystal Glass Edition | December 2025</p>
+    </footer>
+</body>
+
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messages & Circulars - APNA SCHOOL</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <div class="animated-bg">
+        <div class="floating-shapes">
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+        </div>
+    </div>
+
+    <nav class="navbar">
+        <a href="index.html" class="navbar-brand">🎓 APNA SCHOOL</a>
+        <button class="menu-toggle" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
+        <ul class="navbar-nav">
+            <li><span class="nav-link" id="userName">User</span></li>
+            <li><button class="btn btn-glass btn-sm" onclick="Auth.logout()">Logout</button></li>
+        </ul>
+    </nav>
+
+    <aside class="sidebar" id="sidebar">
+        <nav class="sidebar-nav" id="sidebarLinks">
+            <!-- Populated by JS based on role -->
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Messages & Circulars</h1>
+            <p class="page-subtitle">Stay updated with the latest school announcements.</p>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">📢 Notice Board</h3>
+            </div>
+            <div class="activity-list" id="circularsList">
+                <div class="p-4 text-center text-muted">Loading messages...</div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/db.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/utils.js"></script>
+    <script>
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('active'); }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!Auth.isLoggedIn()) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const user = Auth.currentUser();
+            document.getElementById('userName').textContent = user.name;
+            setupSidebar(user.role);
+
+            await loadCirculars(user.role);
+        });
+
+        function setupSidebar(role) {
+            const sidebar = document.getElementById('sidebarLinks');
+            if (role === 'student') {
+                sidebar.innerHTML = `
+                    <a href="student-dashboard.html" class="sidebar-link"><span class="sidebar-icon">📊</span> Dashboard</a>
+                    <a href="student-attendance.html" class="sidebar-link"><span class="sidebar-icon">📅</span> My Attendance</a>
+                    <a href="student-marks.html" class="sidebar-link"><span class="sidebar-icon">📝</span> Results & Marks</a>
+                    <a href="student-timetable.html" class="sidebar-link"><span class="sidebar-icon">📆</span> Class Timetable</a>
+                    <a href="student-fees.html" class="sidebar-link"><span class="sidebar-icon">💰</span> Fee Status</a>
+                    <a href="student-messages.html" class="sidebar-link active"><span class="sidebar-icon">💬</span> Messages</a>
+                `;
+            } else if (role === 'parent') {
+                sidebar.innerHTML = `
+                    <a href="parent-dashboard.html" class="sidebar-link"><span class="sidebar-icon">👨‍👩‍👧‍👦</span> Dashboard</a>
+                    <a href="student-fees.html" class="sidebar-link"><span class="sidebar-icon">💰</span> Fee Payment</a>
+                    <a href="student-attendance.html" class="sidebar-link"><span class="sidebar-icon">📅</span> Attendance</a>
+                    <a href="student-marks.html" class="sidebar-link"><span class="sidebar-icon">📝</span> Report Cards</a>
+                    <a href="student-messages.html" class="sidebar-link active"><span class="sidebar-icon">💬</span> Messages</a>
+                `;
+            }
+        }
+
+        async function loadCirculars(role) {
+            await DB.ready();
+            const circulars = await DB.getAll('circulars');
+
+            // Filter: Target role includes 'all' OR current role
+            const myCirculars = circulars
+                .filter(c => c.targetRoles.includes('all') || c.targetRoles.includes(role))
+                .sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
+
+            const container = document.getElementById('circularsList');
+
+            if (myCirculars.length === 0) {
+                container.innerHTML = '<div class="p-8 text-center text-muted">No new messages header.</div>';
+                return;
+            }
+
+            container.innerHTML = myCirculars.map(c => `
+                <div class="activity-item">
+                    <div class="activity-icon ${getPriorityColor(c.priority)}">
+                        ${getIcon(c.type)}
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">
+                            ${c.title}
+                            ${c.priority === 'High' ? '<span class="badge badge-danger" style="margin-left:8px; font-size:10px;">Important</span>' : ''}
+                        </div>
+                        <div class="activity-time">${new Date(c.publishedAt).toLocaleDateString()} • ${c.type}</div>
+                        <p style="margin-top: 8px; color: #555; line-height: 1.5;">${c.content}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getPriorityColor(priority) {
+            if (priority === 'High') return 'bg-red-100 text-red-600';
+            return 'bg-blue-100 text-blue-600';
+        }
+
+        function getIcon(type) {
+            const icons = { 'Exam': '📝', 'Holiday': '🎉', 'Fee': '💰', 'Event': '🏆', 'General': '📢' };
+            return icons[type] || '📢';
+        }
+    </script>
+</body>
+
+</html>

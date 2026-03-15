@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance - APNA SCHOOL</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .attendance-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: var(--space-4);
+            text-align: center;
+            transition: var(--transition-base);
+            cursor: pointer;
+            border: 3px solid transparent;
+        }
+
+        .attendance-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .attendance-card.present {
+            border-color: var(--color-success);
+            background: rgba(0, 217, 165, 0.1);
+        }
+
+        .attendance-card.absent {
+            border-color: var(--color-danger);
+            background: rgba(255, 90, 90, 0.1);
+        }
+
+        .avatar {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto var(--space-3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: white;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: var(--text-xs);
+            font-weight: 600;
+            margin-top: var(--space-2);
+        }
+
+        .status-badge.present {
+            background: var(--color-success);
+            color: white;
+        }
+
+        .status-badge.absent {
+            background: var(--color-danger);
+            color: white;
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: var(--space-2);
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: var(--space-4);
+            background: var(--glass-bg);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--space-6);
+        }
+
+        .month-calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            margin-top: var(--space-4);
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-sm);
+            font-size: var(--text-sm);
+            cursor: pointer;
+        }
+
+        .calendar-day.header {
+            font-weight: bold;
+            color: #666;
+        }
+
+        .calendar-day.present {
+            background: var(--color-success);
+            color: white;
+        }
+
+        .calendar-day.absent {
+            background: var(--color-danger);
+            color: white;
+        }
+
+        .calendar-day.today {
+            box-shadow: 0 0 0 2px var(--color-royal-indigo);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="animated-bg">
+        <div class="floating-shapes">
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+        </div>
+    </div>
+
+    <nav class="navbar">
+        <a href="index.html" class="navbar-brand">🎓 APNA SCHOOL</a>
+        <button class="menu-toggle" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
+        <ul class="navbar-nav">
+            <li><button class="btn btn-glass btn-sm" onclick="Auth.logout()">Logout</button></li>
+        </ul>
+    </nav>
+
+    <aside class="sidebar" id="sidebar">
+        <nav class="sidebar-nav">
+            <a href="admin-dashboard.html" class="sidebar-link"><span class="sidebar-icon">📊</span> Dashboard</a>
+            <a href="students.html" class="sidebar-link"><span class="sidebar-icon">👨‍🎓</span> Students</a>
+            <a href="faculty.html" class="sidebar-link"><span class="sidebar-icon">👨‍🏫</span> Faculty</a>
+            <a href="subjects.html" class="sidebar-link"><span class="sidebar-icon">📚</span> Subjects</a>
+            <a href="attendance.html" class="sidebar-link active"><span class="sidebar-icon">📅</span> Attendance</a>
+            <a href="marks.html" class="sidebar-link"><span class="sidebar-icon">📝</span> Marks</a>
+            <a href="fees.html" class="sidebar-link"><span class="sidebar-icon">💰</span> Fees</a>
+            <a href="circulars.html" class="sidebar-link"><span class="sidebar-icon">📢</span> Circulars</a>
+            <a href="timetable.html" class="sidebar-link"><span class="sidebar-icon">📆</span> Timetable</a>
+            <a href="settings.html" class="sidebar-link"><span class="sidebar-icon">⚙️</span> Settings</a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header flex justify-between items-center">
+            <div>
+                <h1 class="page-title">Attendance Management</h1>
+                <p class="page-subtitle">Mark and track student attendance with ease.</p>
+            </div>
+            <div class="flex gap-2">
+                <button class="btn btn-glass" onclick="exportAttendanceReport()">📥 Export CSV</button>
+                <button class="btn btn-glass" onclick="showMonthlyReport()">📊 Monthly Report</button>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="card mb-6">
+            <div class="flex gap-4 flex-wrap items-end">
+                <div class="form-group" style="margin: 0; min-width: 150px;">
+                    <label class="form-label">Date</label>
+                    <input type="date" class="form-control" id="attendanceDate" onchange="loadAttendance()">
+                </div>
+                <div class="form-group" style="margin: 0; min-width: 180px;">
+                    <label class="form-label">Class</label>
+                    <select class="form-control" id="classSelect" onchange="loadSectionsAndAttendance()">
+                        <option value="">Select Class</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin: 0; min-width: 120px;">
+                    <label class="form-label">Section</label>
+                    <select class="form-control" id="sectionSelect" onchange="loadAttendance()">
+                        <option value="">All</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" onclick="saveAttendance()">💾 Save Attendance</button>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <span style="font-weight: 600; margin-right: var(--space-2);">Quick Actions:</span>
+            <button class="btn btn-sm btn-success" onclick="markAll('present')">✅ All Present</button>
+            <button class="btn btn-sm btn-danger" onclick="markAll('absent')">❌ All Absent</button>
+            <button class="btn btn-sm btn-glass" onclick="invertSelection()">🔄 Invert</button>
+            <button class="btn btn-sm btn-glass" onclick="randomAbsent()">🎲 Random Absent (demo)</button>
+        </div>
+
+        <!-- Summary Stats -->
+        <div class="grid grid-4 mb-6">
+            <div class="stat-card">
+                <div class="stat-icon primary">👨‍🎓</div>
+                <div class="stat-value" id="totalCount">0</div>
+                <div class="stat-label">Total Students</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon success">✅</div>
+                <div class="stat-value" id="presentCount">0</div>
+                <div class="stat-label">Present</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, var(--color-danger), #FF3333);">❌
+                </div>
+                <div class="stat-value" id="absentCount">0</div>
+                <div class="stat-label">Absent</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon accent">📊</div>
+                <div class="stat-value" id="attendancePercent">0%</div>
+                <div class="stat-label">Attendance Rate</div>
+            </div>
+        </div>
+
+        <!-- Attendance Grid -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">📋 Click a student to toggle attendance</h3>
+            </div>
+            <div id="attendanceGrid" class="grid gap-4"
+                style="grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));">
+                <p class="text-muted">Select a class and date to load students.</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Monthly Report Modal -->
+    <div class="modal-backdrop" id="monthlyModal">
+        <div class="modal" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3 class="modal-title">📊 Monthly Attendance Report</h3>
+                <button class="modal-close" onclick="closeMonthlyModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Select Student</label>
+                    <select class="form-control" id="reportStudent" onchange="generateMonthlyReport()">
+                        <option value="">Select Student</option>
+                    </select>
+                </div>
+                <div id="monthlyReportContent">
+                    <p class="text-muted text-center">Select a student to view their monthly attendance.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/db.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/schema.js"></script>
+    <script src="js/exports.js"></script>
+    <script>
+        let students = [];
+        let attendanceData = {};
+        let classes = [];
+        let sections = [];
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!Auth.requireRole(['admin', 'faculty', 'developer'])) return;
+            document.getElementById('attendanceDate').value = Utils.today();
+            await loadClasses();
+        });
+
+        async function loadClasses() {
+            await DB.ready();
+            classes = await DB.getAll('classes');
+            sections = await DB.getAll('sections');
+
+            const select = document.getElementById('classSelect');
+            select.innerHTML = '<option value="">Select Class</option>' +
+                classes.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+        }
+
+        function loadSectionsAndAttendance() {
+            const classId = document.getElementById('classSelect').value;
+            const sectionSelect = document.getElementById('sectionSelect');
+
+            const classSections = sections.filter(s => s.classId === classId);
+            sectionSelect.innerHTML = '<option value="">All Sections</option>' +
+                classSections.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+
+            loadAttendance();
+        }
+
+        async function loadAttendance() {
+            const date = document.getElementById('attendanceDate').value;
+            const classId = document.getElementById('classSelect').value;
+            const sectionId = document.getElementById('sectionSelect').value;
+
+            if (!date || !classId) return;
+
+            await DB.ready();
+
+            // Get students for this class
+            let allStudents = await DB.getAll('students');
+            students = allStudents.filter(s => s.classId === classId);
+            if (sectionId) {
+                students = students.filter(s => s.sectionId === sectionId);
+            }
+
+            // Get existing attendance
+            const allAttendance = await DB.getAll('attendance');
+            const todayAttendance = allAttendance.filter(a => a.date === date && a.classId === classId);
+
+            // Build attendance map
+            attendanceData = {};
+            todayAttendance.forEach(a => {
+                attendanceData[a.studentId] = a.status;
+            });
+
+            // Default to present for new records
+            students.forEach(s => {
+                if (!attendanceData[s.id]) {
+                    attendanceData[s.id] = 'present';
+                }
+            });
+
+            displayAttendance();
+        }
+
+        function getAvatarColor(name) {
+            const colors = ['#5A3FFF', '#00D9A5', '#4DE3FF', '#FF5A5A', '#FF8C42', '#CFA7FF'];
+            const index = name.charCodeAt(0) % colors.length;
+            return colors[index];
+        }
+
+        function displayAttendance() {
+            const grid = document.getElementById('attendanceGrid');
+
+            if (students.length === 0) {
+                grid.innerHTML = '<p class="text-muted" style="grid-column: 1/-1;">No students found. Please select a different class or check if students are seeded.</p>';
+                updateStats();
+                return;
+            }
+
+            grid.innerHTML = students.map(student => {
+                const status = attendanceData[student.id] || 'present';
+                const isPresent = status === 'present';
+
+                return `
+          <div class="attendance-card ${status}" onclick="toggleAttendance('${student.id}')" id="card_${student.id}">
+            <div class="avatar" style="background: ${getAvatarColor(student.name)};">
+              ${Utils.getInitials(student.name)}
+            </div>
+            <h4 style="font-size: var(--text-sm); margin: 0;">${student.name}</h4>
+            <p style="color: #666; font-size: var(--text-xs); margin: 4px 0;">${student.rollNo}</p>
+            <span class="status-badge ${status}" id="badge_${student.id}">
+              ${isPresent ? '✅ Present' : '❌ Absent'}
+            </span>
+          </div>
+        `;
+            }).join('');
+
+            updateStats();
+        }
+
+        function toggleAttendance(studentId) {
+            const current = attendanceData[studentId] || 'present';
+            attendanceData[studentId] = current === 'present' ? 'absent' : 'present';
+
+            const card = document.getElementById(`card_${studentId}`);
+            const badge = document.getElementById(`badge_${studentId}`);
+            const newStatus = attendanceData[studentId];
+
+            card.className = `attendance-card ${newStatus}`;
+            badge.className = `status-badge ${newStatus}`;
+            badge.innerHTML = newStatus === 'present' ? '✅ Present' : '❌ Absent';
+
+            updateStats();
+        }
+
+        function markAll(status) {
+            students.forEach(student => {
+                attendanceData[student.id] = status;
+            });
+            displayAttendance();
+        }
+
+        function invertSelection() {
+            students.forEach(student => {
+                const current = attendanceData[student.id] || 'present';
+                attendanceData[student.id] = current === 'present' ? 'absent' : 'present';
+            });
+            displayAttendance();
+        }
+
+        function randomAbsent() {
+            students.forEach(student => {
+                attendanceData[student.id] = Math.random() > 0.15 ? 'present' : 'absent';
+            });
+            displayAttendance();
+            Utils.showToast('Random attendance generated (85% present)', 'info');
+        }
+
+        function updateStats() {
+            const total = students.length;
+            let present = 0;
+
+            students.forEach(s => {
+                if (attendanceData[s.id] === 'present') present++;
+            });
+
+            const absent = total - present;
+            const percent = total > 0 ? Math.round((present / total) * 100) : 0;
+
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('presentCount').textContent = present;
+            document.getElementById('absentCount').textContent = absent;
+            document.getElementById('attendancePercent').textContent = percent + '%';
+        }
+
+        async function saveAttendance() {
+            const date = document.getElementById('attendanceDate').value;
+            const classId = document.getElementById('classSelect').value;
+            const sectionId = document.getElementById('sectionSelect').value;
+
+            if (!date || !classId) {
+                Utils.showToast('Please select date and class', 'warning');
+                return;
+            }
+
+            if (students.length === 0) {
+                Utils.showToast('No students to save', 'warning');
+                return;
+            }
+
+            const user = Auth.currentUser();
+
+            // Delete existing attendance for this date/class
+            const allAttendance = await DB.getAll('attendance');
+            for (const a of allAttendance) {
+                if (a.date === date && a.classId === classId) {
+                    if (!sectionId || a.sectionId === sectionId) {
+                        await DB.delete('attendance', a.id);
+                    }
+                }
+            }
+
+            // Save new attendance
+            for (const student of students) {
+                const status = attendanceData[student.id] || 'present';
+                await DB.add('attendance', {
+                    studentId: student.id,
+                    date: date,
+                    status: status,
+                    classId: classId,
+                    sectionId: student.sectionId,
+                    markedBy: user.userId,
+                    markedAt: new Date().toISOString()
+                });
+            }
+
+            Utils.showToast('Attendance saved successfully!', 'success');
+        }
+
+        function exportAttendanceReport() {
+            const classId = document.getElementById('classSelect').value;
+            const date = document.getElementById('attendanceDate').value;
+            Exports.exportAttendance(classId, date, date, 'csv');
+        }
+
+        function showMonthlyReport() {
+            document.getElementById('monthlyModal').classList.add('active');
+
+            const select = document.getElementById('reportStudent');
+            select.innerHTML = '<option value="">Select Student</option>' +
+                students.map(s => `<option value="${s.id}">${s.name} - ${s.rollNo}</option>`).join('');
+        }
+
+        function closeMonthlyModal() {
+            document.getElementById('monthlyModal').classList.remove('active');
+        }
+
+        async function generateMonthlyReport() {
+            const studentId = document.getElementById('reportStudent').value;
+            if (!studentId) return;
+
+            const student = students.find(s => s.id === studentId);
+            const allAttendance = await DB.getAll('attendance');
+            const studentAttendance = allAttendance.filter(a => a.studentId === studentId);
+
+            // Get current month's dates
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = today.getMonth();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            // Build calendar data
+            const attendanceByDate = {};
+            studentAttendance.forEach(a => {
+                attendanceByDate[a.date] = a.status;
+            });
+
+            let presentDays = 0;
+            let absentDays = 0;
+            let totalSchoolDays = 0;
+
+            let calendarHTML = '<div class="month-calendar">';
+            calendarHTML += ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+                .map(d => `<div class="calendar-day header">${d}</div>`).join('');
+
+            // Add empty cells for first day offset
+            const firstDay = new Date(year, month, 1).getDay();
+            for (let i = 0; i < firstDay; i++) {
+                calendarHTML += '<div class="calendar-day"></div>';
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = `${year}-${(month + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+                const dayOfWeek = new Date(year, month, day).getDay();
+                const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+                const isToday = day === today.getDate();
+                const status = attendanceByDate[date];
+
+                let cellClass = 'calendar-day';
+                if (isToday) cellClass += ' today';
+                if (status === 'present') { cellClass += ' present'; presentDays++; totalSchoolDays++; }
+                else if (status === 'absent') { cellClass += ' absent'; absentDays++; totalSchoolDays++; }
+
+                calendarHTML += `<div class="${cellClass}">${day}</div>`;
+            }
+
+            calendarHTML += '</div>';
+
+            const percentage = totalSchoolDays > 0 ? Math.round((presentDays / totalSchoolDays) * 100) : 0;
+
+            document.getElementById('monthlyReportContent').innerHTML = `
+        <div style="text-align: center; margin-bottom: var(--space-4);">
+          <h3>${student.name}</h3>
+          <p style="color: #666;">${new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</p>
+        </div>
+        ${calendarHTML}
+        <div class="grid grid-3 gap-4" style="margin-top: var(--space-6);">
+          <div class="stat-card">
+            <div class="stat-value" style="color: var(--color-success);">${presentDays}</div>
+            <div class="stat-label">Present</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" style="color: var(--color-danger);">${absentDays}</div>
+            <div class="stat-label">Absent</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">${percentage}%</div>
+            <div class="stat-label">Attendance</div>
+          </div>
+        </div>
+      `;
+        }
+    </script>
+</body>
+
+</html>

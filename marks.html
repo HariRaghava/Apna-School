@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marks Management - APNA SCHOOL</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <div class="animated-bg">
+        <div class="floating-shapes">
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+        </div>
+    </div>
+
+    <nav class="navbar">
+        <a href="index.html" class="navbar-brand">🎓 APNA SCHOOL</a>
+        <button class="menu-toggle" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
+        <ul class="navbar-nav">
+            <li><button class="btn btn-glass btn-sm" onclick="Auth.logout()">Logout</button></li>
+        </ul>
+    </nav>
+
+    <aside class="sidebar" id="sidebar">
+        <nav class="sidebar-nav">
+            <a href="admin-dashboard.html" class="sidebar-link"><span class="sidebar-icon">📊</span> Dashboard</a>
+            <a href="students.html" class="sidebar-link"><span class="sidebar-icon">👨‍🎓</span> Students</a>
+            <a href="faculty.html" class="sidebar-link"><span class="sidebar-icon">👨‍🏫</span> Faculty</a>
+            <a href="attendance.html" class="sidebar-link"><span class="sidebar-icon">📅</span> Attendance</a>
+            <a href="marks.html" class="sidebar-link active"><span class="sidebar-icon">📝</span> Marks</a>
+            <a href="fees.html" class="sidebar-link"><span class="sidebar-icon">💰</span> Fees</a>
+            <a href="timetable.html" class="sidebar-link"><span class="sidebar-icon">📆</span> Timetable</a>
+            <a href="settings.html" class="sidebar-link"><span class="sidebar-icon">⚙️</span> Settings</a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Marks Management</h1>
+            <p class="page-subtitle">Enter and manage student exam marks.</p>
+        </div>
+
+        <!-- Controls -->
+        <div class="card mb-6">
+            <div class="flex gap-4 flex-wrap items-center">
+                <div class="form-group" style="margin: 0;">
+                    <label class="form-label">Class</label>
+                    <select class="form-control" id="classSelect" onchange="loadMarks()">
+                        <option value="">Loading Classes...</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin: 0;">
+                    <label class="form-label">Subject</label>
+                    <select class="form-control" id="subjectSelect" onchange="loadMarks()">
+                        <option value="">Select Subject</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin: 0;">
+                    <label class="form-label">Exam Type</label>
+                    <select class="form-control" id="examSelect" onchange="loadMarks()">
+                        <option value="">Select Exam</option>
+                        <option value="Unit Test 1">Unit Test 1</option>
+                        <option value="Mid-Term">Mid-Term</option>
+                        <option value="Unit Test 2">Unit Test 2</option>
+                        <option value="Final">Final Exam</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" onclick="saveMarks()" style="margin-top: auto;">💾 Save Marks</button>
+                <button class="btn btn-accent" onclick="generateMarksheet()" style="margin-top: auto;">📄 Generate
+                    PDF</button>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="grid grid-4 mb-6">
+            <div class="stat-card">
+                <div class="stat-icon primary">👨‍🎓</div>
+                <div class="stat-value" id="totalStudents">0</div>
+                <div class="stat-label">Total Students</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon success">✅</div>
+                <div class="stat-value" id="passCount">0</div>
+                <div class="stat-label">Passed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, var(--color-danger), #FF3333);">❌
+                </div>
+                <div class="stat-value" id="failCount">0</div>
+                <div class="stat-label">Failed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon accent">📊</div>
+                <div class="stat-value" id="avgMarks">0%</div>
+                <div class="stat-label">Class Average</div>
+            </div>
+        </div>
+
+        <!-- Marks Entry Table -->
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Roll No</th>
+                        <th>Student Name</th>
+                        <th>Marks (0-100)</th>
+                        <th>Grade</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="marksTable">
+                    <tr>
+                        <td colspan="5" class="text-center text-muted">Select class, subject, and exam type to load
+                            students.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Marksheet Modal -->
+    <div class="modal-backdrop" id="marksheetModal">
+        <div class="modal" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3 class="modal-title">📄 Student Mark Sheet</h3>
+                <button class="modal-close" onclick="closeMarksheet()">×</button>
+            </div>
+            <div class="modal-body" id="marksheetContent">
+                <!-- Generated by JS -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="printMarksheet()">🖨️ Print</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/db.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/utils.js"></script>
+    <script>
+        let students = [];
+        let subjects = [];
+        let marksData = {};
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!Auth.requireRole(['admin', 'faculty', 'developer'])) return;
+            await Utils.guard(async () => {
+                await loadClasses(); // Load classes dynamically
+                await loadSubjects();
+            });
+        });
+
+        async function loadClasses() {
+            await DB.ready();
+            const classes = await DB.getAll('classes');
+            // Sort classes by grade/name
+            classes.sort((a, b) => a.grade - b.grade);
+
+            const select = document.getElementById('classSelect');
+            select.innerHTML = '<option value="">Select Class</option>' +
+                classes.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+        }
+
+        async function loadSubjects() {
+            await DB.ready();
+            subjects = await DB.getAll('subjects');
+
+            const select = document.getElementById('subjectSelect');
+            select.innerHTML = '<option value="">Select Subject</option>' +
+                subjects.map(s => `<option value="${s.id}">${s.icon} ${s.name}</option>`).join('');
+        }
+
+        async function loadMarks() {
+            const classId = document.getElementById('classSelect').value;
+            const subjectId = document.getElementById('subjectSelect').value;
+            const examType = document.getElementById('examSelect').value;
+
+            const tbody = document.getElementById('marksTable');
+
+            if (!classId || !subjectId || !examType) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Select class, subject, and exam type to load students.</td></tr>';
+                return;
+            }
+
+            await DB.ready();
+
+            // Get students for this class - Use classId NOT class
+            const allStudents = await DB.getAll('students');
+            students = allStudents.filter(s => s.classId === classId).sort((a, b) => a.rollNo.localeCompare(b.rollNo));
+
+            // Get existing marks
+            const allMarks = await DB.getAll('marks');
+            const existingMarks = allMarks.filter(m =>
+                m.subjectId === subjectId && m.examType === examType
+            );
+
+            // Build marks map
+            marksData = {};
+            existingMarks.forEach(m => {
+                marksData[m.studentId] = m;
+            });
+
+            displayMarks();
+        }
+
+        function displayMarks() {
+            const tbody = document.getElementById('marksTable');
+
+            if (students.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No students found in this class.</td></tr>';
+                updateStats();
+                return;
+            }
+
+            tbody.innerHTML = students.map(student => {
+                const existing = marksData[student.id];
+                const marks = existing ? existing.marks : '';
+                const gradeInfo = typeof marks === 'number' ? Utils.getGrade(marks) : { grade: '-', color: '#999' };
+
+                return `
+          <tr>
+            <td><strong>${student.rollNo}</strong></td>
+            <td>
+              <div style="display: flex; align-items: center; gap: var(--space-3);">
+                <div style="width: 32px; height: 32px; background: linear-gradient(135deg, var(--color-royal-indigo), var(--color-aqua-glow)); border-radius: var(--radius-full); display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: bold;">
+                  ${Utils.getInitials(student.name)}
+                </div>
+                ${student.name}
+              </div>
+            </td>
+            <td>
+              <input type="number" class="form-control" id="marks_${student.id}" 
+                     value="${marks}" min="0" max="100" placeholder="0-100"
+                     style="max-width: 100px;" oninput="updateRow('${student.id}')">
+            </td>
+            <td id="grade_${student.id}" style="font-weight: bold; color: ${gradeInfo.color};">${gradeInfo.grade}</td>
+            <td id="status_${student.id}">
+              ${typeof marks === 'number' ? (marks >= 35 ? '<span class="badge badge-success">Pass</span>' : '<span class="badge badge-danger">Fail</span>') : '-'}
+            </td>
+          </tr>
+        `;
+            }).join('');
+
+            updateStats();
+        }
+
+        function updateRow(studentId) {
+            const input = document.getElementById(`marks_${studentId}`);
+            const val = input.value;
+
+            if (val === '') {
+                document.getElementById(`grade_${studentId}`).textContent = '-';
+                document.getElementById(`status_${studentId}`).innerHTML = '-';
+                delete marksData[studentId]; // Remove from map if empty
+                return;
+            }
+
+            const marks = parseInt(val);
+            if (isNaN(marks)) return; // Invalid input
+
+            const gradeInfo = Utils.getGrade(marks);
+
+            document.getElementById(`grade_${studentId}`).textContent = gradeInfo.grade;
+            document.getElementById(`grade_${studentId}`).style.color = gradeInfo.color;
+
+            // Using 35 as passing marks based on standard Indian school metrics, matching seed.js logic
+            document.getElementById(`status_${studentId}`).innerHTML =
+                marks >= 35 ? '<span class="badge badge-success">Pass</span>' : '<span class="badge badge-danger">Fail</span>';
+
+            // Store cleanly
+            if (marksData[studentId]) {
+                marksData[studentId].marks = marks;
+            } else {
+                marksData[studentId] = { marks: marks };
+            }
+            updateStats();
+        }
+
+        function updateStats() {
+            let total = 0, sum = 0, pass = 0, fail = 0;
+
+            students.forEach(s => {
+                const input = document.getElementById(`marks_${s.id}`);
+                if (input && input.value !== '') {
+                    const marks = parseInt(input.value);
+                    if (!isNaN(marks)) {
+                        total++;
+                        sum += marks;
+                        if (marks >= 35) pass++; else fail++;
+                    }
+                }
+            });
+
+            document.getElementById('totalStudents').textContent = students.length;
+            document.getElementById('passCount').textContent = pass;
+            document.getElementById('failCount').textContent = fail;
+            document.getElementById('avgMarks').textContent = total > 0 ? Math.round(sum / total) + '%' : '0%';
+        }
+
+        async function saveMarks() {
+            const classId = document.getElementById('classSelect').value;
+            const subjectId = document.getElementById('subjectSelect').value;
+            const examType = document.getElementById('examSelect').value;
+
+            if (!classId || !subjectId || !examType) {
+                Utils.showToast('Please select class, subject, and exam type', 'warning');
+                return;
+            }
+
+            const user = Auth.currentUser();
+            const today = new Date().toISOString().split('T')[0];
+
+            let count = 0;
+
+            // We need to save per student
+            for (const student of students) {
+                const input = document.getElementById(`marks_${student.id}`);
+                if (!input || input.value === '') continue; // Skip if empty
+
+                const marks = parseInt(input.value);
+                if (isNaN(marks) || marks < 0 || marks > 100) continue;
+
+                // Check if existing record
+                const existing = marksData[student.id]; // This might be our mock object or real DB object
+                let recordId = existing && existing.id ? existing.id : null;
+
+                // If we have an ID, update, else add
+                const record = {
+                    studentId: student.id,
+                    subjectId: subjectId,
+                    examType: examType,
+                    marks: marks,
+                    maxMarks: 100,
+                    date: today,
+                    enteredBy: user.userId,
+                    remarks: marks >= 35 ? 'Pass' : 'Fail',
+                    academicYearId: 'ay_2024' // Hardcoded for now, ideal to fetch current AY
+                };
+
+                // If we have an existing RECORD form DB (it has an ID), we delete and re-add or just update?
+                // DB.js typically supports update, but let's see. 
+                // DB.add actually generates a new ID. 
+                // Best practice with this simple DB: Find and Delete old for this student/subject/exam, then Add new.
+                // Optimized: We already filtered existingMarks in loadMarks.
+
+                // Let's do a robust "Delete all for this criteria" then "Add all new" approach 
+                // OR check individual logic.
+                // Simpler: Just add. But that creates dupes.
+                // Correct logic: Identify changed records.
+
+                // For now, let's delete OLD record if exists, then add NEW.
+                if (existing && existing.id) {
+                    await DB.delete('marks', existing.id);
+                }
+
+                await DB.add('marks', record);
+                count++;
+            }
+
+            Utils.showToast(`Saved marks for ${count} students!`, 'success');
+            await loadMarks(); // Reload to refresh data/IDs
+        }
+
+        async function generateMarksheet() {
+            const classId = document.getElementById('classSelect').value;
+
+            if (!classId || students.length === 0) {
+                Utils.showToast('Please select a class first', 'warning');
+                return;
+            }
+
+            // Get all marks for these students
+            const allMarks = await DB.getAll('marks');
+            const studentMarks = {};
+
+            students.forEach(s => {
+                studentMarks[s.id] = allMarks.filter(m => m.studentId === s.id);
+            });
+
+            // Fetch Class Name for title
+            const classes = await DB.getAll('classes');
+            const cls = classes.find(c => c.id === classId);
+            const className = cls ? cls.name : classId;
+
+            const modal = document.getElementById('marksheetModal');
+            const content = document.getElementById('marksheetContent');
+
+            content.innerHTML = `
+        <div style="text-align: center; margin-bottom: var(--space-6);">
+          <h2 style="color: var(--color-royal-indigo);">🎓 APNA SCHOOL</h2>
+          <p style="color: #666;">Academic Year 2024-25</p>
+          <h3>Class ${className} - Consolidated Mark Sheet</h3>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Roll No</th>
+              <th>Name</th>
+              ${subjects.slice(0, 5).map(s => `<th>${s.name.substring(0, 4)}</th>`).join('')}
+              <th>Total</th>
+              <th>%</th>
+              <th>Grade</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${students.map(student => {
+                const marks = studentMarks[student.id] || [];
+                let total = 0, count = 0;
+
+                const subjectMarks = subjects.slice(0, 5).map(s => {
+                    const m = marks.find(x => x.subjectId === s.id);
+                    if (m && typeof m.marks === 'number') {
+                        total += m.marks;
+                        count++;
+                        return m.marks;
+                    }
+                    return '-';
+                });
+
+                // Calculate average based on ALL subjects attempting or just these 5?
+                // Let's assume standard % is Total / (Count * 100) * 100 -> Total/Count?
+                // Actually if max marks is 100 per subject.
+                const avg = count > 0 ? Math.round(total / count) : 0;
+                const grade = Utils.getGrade(avg);
+
+                return `
+                <tr>
+                  <td>${student.rollNo}</td>
+                  <td>${student.name}</td>
+                  ${subjectMarks.map(m => `<td>${m}</td>`).join('')}
+                  <td><strong>${count > 0 ? total : '-'}</strong></td>
+                  <td>${count > 0 ? avg + '%' : '-'}</td>
+                  <td style="color: ${grade.color}; font-weight: bold;">${count > 0 ? grade.grade : '-'}</td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+        <div style="margin-top: var(--space-8); display: flex; justify-content: space-between;">
+          <div style="text-align: center;">
+            <div style="border-top: 1px solid #333; padding-top: var(--space-2); margin-top: 60px;">Class Teacher</div>
+          </div>
+          <div style="text-align: center;">
+            <div style="border-top: 1px solid #333; padding-top: var(--space-2); margin-top: 60px;">Principal</div>
+          </div>
+        </div>
+      `;
+
+            modal.classList.add('active');
+        }
+
+        function closeMarksheet() {
+            document.getElementById('marksheetModal').classList.remove('active');
+        }
+
+        function printMarksheet() {
+            const content = document.getElementById('marksheetContent').innerHTML;
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+        <html>
+          <head>
+            <title>Mark Sheet - APNA SCHOOL</title>
+            <style>
+              body { font-family: Arial, sans-serif; padding: 20px; }
+              table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+              th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+              th { background: #5A3FFF; color: white; }
+              h2, h3 { margin: 10px 0; }
+            </style>
+          </head>
+          <body>${content}</body>
+        </html>
+      `);
+            printWindow.document.close();
+            printWindow.print();
+        }
+    </script>
+</body>
+
+</html>

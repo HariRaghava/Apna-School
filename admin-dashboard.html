@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - APNA SCHOOL</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        /* Analytics Charts */
+        .chart-container {
+            height: 200px;
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(90, 63, 255, 0.05), rgba(77, 227, 255, 0.05));
+            border-radius: var(--radius-xl);
+        }
+
+        .chart-bar {
+            flex: 1;
+            background: linear-gradient(to top, #5A3FFF, #4DE3FF);
+            border-radius: 8px 8px 0 0;
+            transition: all 0.3s ease;
+            position: relative;
+            min-height: 20px;
+        }
+
+        .chart-bar:hover {
+            transform: scaleY(1.05);
+            opacity: 0.9;
+        }
+
+        .chart-bar::after {
+            content: attr(data-label);
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 11px;
+            color: #666;
+            white-space: nowrap;
+        }
+
+        .chart-bar::before {
+            content: attr(data-value);
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            font-weight: 600;
+            color: #5A3FFF;
+        }
+
+        /* Progress Ring */
+        .progress-ring {
+            width: 120px;
+            height: 120px;
+            position: relative;
+        }
+
+        .progress-ring svg {
+            transform: rotate(-90deg);
+        }
+
+        .progress-ring-circle {
+            fill: none;
+            stroke: #e0e0e0;
+            stroke-width: 10;
+        }
+
+        .progress-ring-progress {
+            fill: none;
+            stroke: url(#gradient);
+            stroke-width: 10;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 1s ease;
+        }
+
+        .progress-ring-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .progress-ring-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #1a1a2e;
+        }
+
+        .progress-ring-label {
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* Quick Stats Row */
+        .quick-stat {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: white;
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .quick-stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .quick-stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+
+        .quick-stat-label {
+            font-size: 13px;
+            color: #666;
+        }
+
+        /* Activity Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 28px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, #5A3FFF, #4DE3FF);
+        }
+
+        .timeline-item {
+            position: relative;
+            padding: 16px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .timeline-item:last-child {
+            border-bottom: none;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -24px;
+            top: 20px;
+            width: 12px;
+            height: 12px;
+            background: white;
+            border: 3px solid #5A3FFF;
+            border-radius: 50%;
+        }
+
+        .timeline-time {
+            font-size: 11px;
+            color: #999;
+            margin-top: 4px;
+        }
+
+        /* Admin Card */
+        .admin-card {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            background: white;
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            margin-bottom: 12px;
+        }
+
+        .admin-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #5A3FFF, #4DE3FF);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .admin-info {
+            flex: 1;
+        }
+
+        .admin-name {
+            font-weight: 600;
+            color: #1a1a2e;
+        }
+
+        .admin-role {
+            font-size: 13px;
+            color: #666;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="animated-bg">
+        <div class="floating-shapes">
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+        </div>
+    </div>
+
+    <nav class="navbar">
+        <a href="index.html" class="navbar-brand">🎓 APNA SCHOOL</a>
+        <button class="menu-toggle" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
+        <ul class="navbar-nav">
+            <li><span class="nav-link" id="userName">Admin</span></li>
+            <li><button class="btn btn-glass btn-sm" onclick="Auth.logout()">Logout</button></li>
+        </ul>
+    </nav>
+
+    <aside class="sidebar" id="sidebar">
+        <nav class="sidebar-nav">
+            <a href="admin-dashboard.html" class="sidebar-link active"><span class="sidebar-icon">📊</span>
+                Dashboard</a>
+            <a href="students.html" class="sidebar-link"><span class="sidebar-icon">👨‍🎓</span> Students</a>
+            <a href="faculty.html" class="sidebar-link"><span class="sidebar-icon">👨‍🏫</span> Faculty</a>
+            <a href="subjects.html" class="sidebar-link"><span class="sidebar-icon">📚</span> Subjects</a>
+            <a href="attendance.html" class="sidebar-link"><span class="sidebar-icon">📅</span> Attendance</a>
+            <a href="marks.html" class="sidebar-link"><span class="sidebar-icon">📝</span> Marks</a>
+            <a href="fees.html" class="sidebar-link"><span class="sidebar-icon">💰</span> Fees</a>
+            <a href="circulars.html" class="sidebar-link"><span class="sidebar-icon">📢</span> Circulars</a>
+            <a href="timetable.html" class="sidebar-link"><span class="sidebar-icon">📆</span> Timetable</a>
+            <a href="settings.html" class="sidebar-link"><span class="sidebar-icon">⚙️</span> Settings</a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header flex justify-between items-center">
+            <div>
+                <h1 class="page-title">Admin Dashboard</h1>
+                <p class="page-subtitle">Welcome back! Here's your school overview.</p>
+            </div>
+            <div class="flex gap-2">
+                <span class="badge badge-primary" id="academicYear">2024-25</span>
+                <span class="badge badge-success" id="todayDate"></span>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="grid grid-4 mb-6">
+            <div class="quick-stat">
+                <div class="quick-stat-icon"
+                    style="background: linear-gradient(135deg, rgba(90, 63, 255, 0.1), rgba(90, 63, 255, 0.2));">👨‍🎓
+                </div>
+                <div>
+                    <div class="quick-stat-value" id="totalStudents">0</div>
+                    <div class="quick-stat-label">Total Students</div>
+                </div>
+            </div>
+            <div class="quick-stat">
+                <div class="quick-stat-icon"
+                    style="background: linear-gradient(135deg, rgba(0, 217, 165, 0.1), rgba(0, 217, 165, 0.2));">👨‍🏫
+                </div>
+                <div>
+                    <div class="quick-stat-value" id="totalFaculty">0</div>
+                    <div class="quick-stat-label">Faculty Members</div>
+                </div>
+            </div>
+            <div class="quick-stat">
+                <div class="quick-stat-icon"
+                    style="background: linear-gradient(135deg, rgba(77, 227, 255, 0.1), rgba(77, 227, 255, 0.2));">📚
+                </div>
+                <div>
+                    <div class="quick-stat-value" id="totalSubjects">0</div>
+                    <div class="quick-stat-label">Subjects</div>
+                </div>
+            </div>
+            <div class="quick-stat">
+                <div class="quick-stat-icon"
+                    style="background: linear-gradient(135deg, rgba(207, 167, 255, 0.1), rgba(207, 167, 255, 0.2));">🏫
+                </div>
+                <div>
+                    <div class="quick-stat-value" id="totalClasses">0</div>
+                    <div class="quick-stat-label">Classes</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="grid grid-2 mb-6">
+            <!-- Attendance Chart -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">📅 Weekly Attendance</h3>
+                </div>
+                <div class="chart-container" id="attendanceChart" style="padding-bottom: 40px;"></div>
+            </div>
+
+            <!-- Fee Collection Progress -->
+            <div class="card">
+                <div class="card-header flex justify-between items-center">
+                    <h3 class="card-title">💰 Fee Collection</h3>
+                    <span class="badge badge-success" id="feePercent">0%</span>
+                </div>
+                <div class="flex items-center justify-around" style="padding: 20px;">
+                    <div class="progress-ring">
+                        <svg width="120" height="120">
+                            <defs>
+                                <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" style="stop-color:#5A3FFF" />
+                                    <stop offset="100%" style="stop-color:#00D9A5" />
+                                </linearGradient>
+                            </defs>
+                            <circle class="progress-ring-circle" cx="60" cy="60" r="50" />
+                            <circle class="progress-ring-progress" cx="60" cy="60" r="50" stroke-dasharray="314"
+                                stroke-dashoffset="314" id="feeRing" />
+                        </svg>
+                        <div class="progress-ring-text">
+                            <div class="progress-ring-value" id="feeRingValue">0%</div>
+                            <div class="progress-ring-label">Collected</div>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="margin-bottom: 16px;">
+                            <div style="font-size: 14px; color: #666;">Total Fees</div>
+                            <div style="font-size: 24px; font-weight: bold; color: #1a1a2e;" id="totalFees">₹0</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 14px; color: #666;">Collected</div>
+                            <div style="font-size: 24px; font-weight: bold; color: #00D9A5;" id="collectedFees">₹0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Row -->
+        <div class="grid grid-3 gap-6">
+            <!-- Quick Actions -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">⚡ Quick Actions</h3>
+                </div>
+                <div class="grid grid-2 gap-3">
+                    <a href="students.html" class="btn btn-primary btn-sm">➕ Add Student</a>
+                    <a href="faculty.html" class="btn btn-accent btn-sm">➕ Add Faculty</a>
+                    <a href="attendance.html" class="btn btn-glass btn-sm">📅 Attendance</a>
+                    <a href="marks.html" class="btn btn-glass btn-sm">📝 Enter Marks</a>
+                    <a href="fees.html" class="btn btn-glass btn-sm">💰 Collect Fees</a>
+                    <a href="circulars.html" class="btn btn-glass btn-sm">📢 Circular</a>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">🕐 Recent Activity</h3>
+                </div>
+                <div class="timeline" id="activityTimeline">
+                    <div class="timeline-item">
+                        <div>📅 Attendance marked for Class 10A</div>
+                        <div class="timeline-time">Today, 9:00 AM</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div>👨‍🎓 New student admission</div>
+                        <div class="timeline-time">Yesterday, 3:30 PM</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div>💰 Fee payment received</div>
+                        <div class="timeline-time">Yesterday, 11:00 AM</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Administrators -->
+            <div class="card">
+                <div class="card-header flex justify-between items-center">
+                    <h3 class="card-title">👥 Administrators</h3>
+                    <button class="btn btn-sm btn-primary" onclick="showAddAdminModal()">+ Add</button>
+                </div>
+                <div id="adminList">
+                    <div class="admin-card">
+                        <div class="admin-avatar">AD</div>
+                        <div class="admin-info">
+                            <div class="admin-name">Administrator</div>
+                            <div class="admin-role">Super Admin</div>
+                        </div>
+                        <span class="badge badge-success">Active</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Class Overview -->
+        <div class="card mt-6">
+            <div class="card-header">
+                <h3 class="card-title">🏫 Class-wise Overview</h3>
+            </div>
+            <div class="table-container" style="box-shadow: none;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Class</th>
+                            <th>Students</th>
+                            <th>Attendance</th>
+                            <th>Fee Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="classOverview"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Add Admin Modal -->
+    <div class="modal-backdrop" id="adminModal">
+        <div class="modal" style="max-width: 450px;">
+            <div class="modal-header">
+                <h3 class="modal-title">➕ Add Administrator</h3>
+                <button class="modal-close" onclick="closeAdminModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="adminForm" onsubmit="createAdmin(event)">
+                    <div class="form-group">
+                        <label class="form-label">Full Name *</label>
+                        <input type="text" class="form-control" id="adminName" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Username *</label>
+                        <input type="text" class="form-control" id="adminUsername" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" id="adminEmail">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Password *</label>
+                        <input type="password" class="form-control" id="adminPassword" required minlength="6">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Role</label>
+                        <select class="form-control" id="adminRole">
+                            <option value="admin">Admin</option>
+                            <option value="developer">Developer</option>
+                        </select>
+                    </div>
+                    <div class="modal-footer" style="border: none; padding: 0; margin-top: var(--space-4);">
+                        <button type="button" class="btn btn-glass" onclick="closeAdminModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Create Admin</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/db.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/utils.js"></script>
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!Auth.requireRole(['admin', 'developer'])) return;
+
+            const user = Auth.currentUser();
+            document.getElementById('userName').textContent = user.name;
+            document.getElementById('todayDate').textContent = new Date().toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
+
+            await loadDashboardStats();
+        });
+
+        async function loadDashboardStats() {
+            await DB.ready();
+
+            const students = await DB.getAll('students');
+            const faculty = await DB.getAll('faculty');
+            const subjects = await DB.getAll('subjects');
+            const classes = await DB.getAll('classes');
+            const fees = await DB.getAll('fees');
+            const attendance = await DB.getAll('attendance');
+            const users = await DB.getAll('users');
+
+            // Quick stats
+            Utils.animateCounter(document.getElementById('totalStudents'), students.length);
+            Utils.animateCounter(document.getElementById('totalFaculty'), faculty.length);
+            Utils.animateCounter(document.getElementById('totalSubjects'), subjects.length);
+            Utils.animateCounter(document.getElementById('totalClasses'), classes.length);
+
+            // Fee collection
+            const totalFee = fees.reduce((sum, f) => sum + (f.totalAmount || 0), 0);
+            const collectedFee = fees.reduce((sum, f) => sum + (f.paidAmount || 0), 0);
+            const feePercent = totalFee > 0 ? Math.round((collectedFee / totalFee) * 100) : 0;
+
+            document.getElementById('totalFees').textContent = Utils.formatCurrency(totalFee);
+            document.getElementById('collectedFees').textContent = Utils.formatCurrency(collectedFee);
+            document.getElementById('feePercent').textContent = feePercent + '%';
+            document.getElementById('feeRingValue').textContent = feePercent + '%';
+
+            // Animate ring
+            const ring = document.getElementById('feeRing');
+            const offset = 314 - (314 * feePercent / 100);
+            setTimeout(() => ring.style.strokeDashoffset = offset, 100);
+
+            // Attendance chart (last 7 days)
+            renderAttendanceChart(attendance, students);
+
+            // Admin list
+            const admins = users.filter(u => u.role === 'admin' || u.role === 'developer');
+            renderAdminList(admins);
+
+            // Class overview
+            renderClassOverview(classes, students, fees);
+        }
+
+        function renderAttendanceChart(attendance, students) {
+            const chart = document.getElementById('attendanceChart');
+            const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const today = new Date();
+
+            let html = '';
+            for (let i = 5; i >= 0; i--) {
+                const date = new Date(today);
+                date.setDate(date.getDate() - i);
+                if (date.getDay() === 0) continue; // Skip Sunday
+
+                const dateStr = date.toISOString().split('T')[0];
+                const dayAttendance = attendance.filter(a => a.date === dateStr);
+                const present = dayAttendance.filter(a => a.status === 'present').length;
+                const total = dayAttendance.length || 1;
+                const percent = Math.round((present / total) * 100);
+
+                const dayName = days[date.getDay() - 1] || 'Sun';
+                html += `<div class="chart-bar" style="height: ${percent}%;" data-label="${dayName}" data-value="${percent}%"></div>`;
+            }
+            chart.innerHTML = html;
+        }
+
+        function renderAdminList(admins) {
+            const list = document.getElementById('adminList');
+            list.innerHTML = admins.map(admin => `
+        <div class="admin-card">
+          <div class="admin-avatar">${Utils.getInitials(admin.name)}</div>
+          <div class="admin-info">
+            <div class="admin-name">${admin.name}</div>
+            <div class="admin-role">${admin.role === 'developer' ? 'Developer' : 'Admin'}</div>
+          </div>
+          <span class="badge badge-success">Active</span>
+        </div>
+      `).join('');
+        }
+
+        function renderClassOverview(classes, students, fees) {
+            const tbody = document.getElementById('classOverview');
+
+            tbody.innerHTML = classes.map(cls => {
+                const classStudents = students.filter(s => s.classId === cls.id);
+                const classFees = fees.filter(f => classStudents.some(s => s.id === f.studentId));
+                const totalFee = classFees.reduce((sum, f) => sum + (f.totalAmount || 0), 0);
+                const paidFee = classFees.reduce((sum, f) => sum + (f.paidAmount || 0), 0);
+                const feePercent = totalFee > 0 ? Math.round((paidFee / totalFee) * 100) : 0;
+
+                return `
+          <tr>
+            <td><strong>${cls.name}</strong></td>
+            <td>${classStudents.length} students</td>
+            <td><span class="badge badge-primary">85%</span></td>
+            <td>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <div style="flex: 1; height: 8px; background: #e0e0e0; border-radius: 4px; overflow: hidden;">
+                  <div style="width: ${feePercent}%; height: 100%; background: linear-gradient(90deg, #5A3FFF, #00D9A5);"></div>
+                </div>
+                <span style="font-size: 12px; font-weight: 600;">${feePercent}%</span>
+              </div>
+            </td>
+            <td>
+              <a href="students.html?class=${cls.id}" class="btn btn-sm btn-glass">View</a>
+            </td>
+          </tr>
+        `;
+            }).join('');
+        }
+
+        function showAddAdminModal() {
+            document.getElementById('adminForm').reset();
+            document.getElementById('adminModal').classList.add('active');
+        }
+
+        function closeAdminModal() {
+            document.getElementById('adminModal').classList.remove('active');
+        }
+
+        async function createAdmin(e) {
+            e.preventDefault();
+
+            const name = document.getElementById('adminName').value.trim();
+            const username = document.getElementById('adminUsername').value.trim();
+            const email = document.getElementById('adminEmail').value.trim();
+            const password = document.getElementById('adminPassword').value;
+            const role = document.getElementById('adminRole').value;
+
+            try {
+                await Auth.createUser({ username, password, name, role, email });
+                Utils.showToast('Administrator created successfully!', 'success');
+                closeAdminModal();
+                await loadDashboardStats();
+            } catch (error) {
+                Utils.showToast('Error: ' + error.message, 'error');
+            }
+        }
+    </script>
+</body>
+
+</html>

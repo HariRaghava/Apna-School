@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Results - APNA SCHOOL</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <div class="animated-bg">
+        <div class="floating-shapes">
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+        </div>
+    </div>
+
+    <nav class="navbar">
+        <a href="index.html" class="navbar-brand">🎓 APNA SCHOOL</a>
+        <button class="menu-toggle" onclick="toggleSidebar()">
+            <span></span><span></span><span></span>
+        </button>
+        <ul class="navbar-nav">
+            <li><span class="nav-link" id="userName">Student</span></li>
+            <li><button class="btn btn-glass btn-sm" onclick="Auth.logout()">Logout</button></li>
+        </ul>
+    </nav>
+
+    <aside class="sidebar" id="sidebar">
+        <nav class="sidebar-nav">
+            <a href="student-dashboard.html" class="sidebar-link"><span class="sidebar-icon">📊</span> Dashboard</a>
+            <a href="student-attendance.html" class="sidebar-link"><span class="sidebar-icon">📅</span> My
+                Attendance</a>
+            <a href="student-marks.html" class="sidebar-link active"><span class="sidebar-icon">📝</span> Results &
+                Marks</a>
+            <a href="student-timetable.html" class="sidebar-link"><span class="sidebar-icon">📆</span> Class
+                Timetable</a>
+            <a href="student-fees.html" class="sidebar-link"><span class="sidebar-icon">💰</span> Fee Status</a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Results & Marks</h1>
+            <p class="page-subtitle">Your academic performance report.</p>
+        </div>
+
+        <div class="card mb-8">
+            <div class="card-header">
+                <h3 class="card-title">🏆 Recent Exam Results</h3>
+            </div>
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th>Exam Type</th>
+                            <th>Marks Obtained</th>
+                            <th>Max Marks</th>
+                            <th>Grade</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="marksBody">
+                        <!-- Loaded dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="grid grid-2">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">📈 Performance Overview</h3>
+                </div>
+                <div class="card-body flex center middle" style="min-height: 200px;">
+                    <!-- Placeholder for a chart -->
+                    <div style="text-align:center;">
+                        <h2 id="overallPercentage" style="font-size: 3rem; color: var(--color-primary); margin:0;">0%
+                        </h2>
+                        <p class="text-muted">Overall Percentage</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">🎓 Grading Scale</h3>
+                </div>
+                <div class="card-body">
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; font-size:14px;">
+                        <div><strong>A+</strong> : 90-100%</div>
+                        <div><strong>A</strong> : 80-89%</div>
+                        <div><strong>B</strong> : 70-79%</div>
+                        <div><strong>C</strong> : 60-69%</div>
+                        <div><strong>D</strong> : 40-59%</div>
+                        <div><strong>F</strong> : Below 40%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/db.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/utils.js"></script>
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!Auth.requireRole(['student', 'parent'])) return;
+
+            const user = Auth.currentUser();
+            document.getElementById('userName').textContent = user.name;
+            setupSidebar(user.role);
+
+            await Utils.guard(async () => {
+                const params = new URLSearchParams(window.location.search);
+                const studentId = params.get('id') || user.linkedId;
+                await loadMarks(studentId);
+            });
+        });
+
+        function setupSidebar(role) {
+            const sidebar = document.getElementById('sidebarLinks');
+            if (role === 'student') {
+                sidebar.innerHTML = `
+                    <a href="student-dashboard.html" class="sidebar-link"><span class="sidebar-icon">📊</span> Dashboard</a>
+                    <a href="student-attendance.html" class="sidebar-link"><span class="sidebar-icon">📅</span> My Attendance</a>
+                    <a href="student-marks.html" class="sidebar-link active"><span class="sidebar-icon">📝</span> Results & Marks</a>
+                    <a href="student-timetable.html" class="sidebar-link"><span class="sidebar-icon">📆</span> Class Timetable</a>
+                    <a href="student-fees.html" class="sidebar-link"><span class="sidebar-icon">💰</span> Fee Status</a>
+                    <a href="student-messages.html" class="sidebar-link"><span class="sidebar-icon">💬</span> Messages</a>
+                `;
+            } else if (role === 'parent') {
+                sidebar.innerHTML = `
+                    <a href="parent-dashboard.html" class="sidebar-link"><span class="sidebar-icon">👨‍👩‍👧‍👦</span> Dashboard</a>
+                    <a href="student-fees.html" class="sidebar-link"><span class="sidebar-icon">💰</span> Fee Payment</a>
+                    <a href="student-attendance.html" class="sidebar-link"><span class="sidebar-icon">📅</span> Attendance</a>
+                    <a href="student-marks.html" class="sidebar-link active"><span class="sidebar-icon">📝</span> Report Cards</a>
+                    <a href="student-messages.html" class="sidebar-link"><span class="sidebar-icon">💬</span> Messages</a>
+                `;
+            }
+        }
+
+        async function loadMarks(studentId) {
+            await DB.ready();
+            const allMarks = await DB.getAll('marks');
+            const subjects = await DB.getAll('subjects');
+
+            const myMarks = allMarks.filter(m => m.studentId === studentId);
+
+            const tbody = document.getElementById('marksBody');
+
+            if (myMarks.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No marks recorded yet.</td></tr>';
+                return;
+            }
+
+            let totalObtained = 0;
+            let totalMax = 0;
+
+            tbody.innerHTML = myMarks.map(m => {
+                const subject = subjects.find(s => s.id === m.subjectId);
+                const subName = subject ? subject.name : (m.subjectId || 'Unknown');
+                const gradInfo = Utils.getGrade(m.marks); // Using marks property
+
+                // Assuming marks object has: marks (obtained), maxMarks
+                const obtained = m.marks || 0;
+                const max = m.maxMarks || 100;
+
+                totalObtained += obtained;
+                totalMax += max;
+
+                const percentage = Math.round((obtained / max) * 100);
+                const status = obtained >= 35 ? '<span class="badge badge-success">Pass</span>' : '<span class="badge badge-danger">Fail</span>';
+
+                return `
+                    <tr>
+                        <td>
+                            <div class="flex items-center gap-2">
+                                <span style="font-size:1.2em;">${subject ? subject.icon : '📘'}</span>
+                                ${subName}
+                            </div>
+                        </td>
+                        <td>${m.examType || 'Term Exam'}</td>
+                        <td><strong>${obtained}</strong></td>
+                        <td>${max}</td>
+                        <td style="color:${gradInfo.color}; font-weight:bold;">${gradInfo.grade}</td>
+                        <td>${status}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            // Overall
+            if (totalMax > 0) {
+                const overall = Math.round((totalObtained / totalMax) * 100);
+                document.getElementById('overallPercentage').textContent = overall + '%';
+            }
+        }
+    </script>
+</body>
+
+</html>

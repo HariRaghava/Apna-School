@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management - APNA SCHOOL</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <div class="animated-bg">
+        <div class="floating-shapes">
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+        </div>
+    </div>
+
+    <nav class="navbar">
+        <a href="index.html" class="navbar-brand">🎓 APNA SCHOOL</a>
+        <button class="menu-toggle" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
+        <ul class="navbar-nav">
+            <li><button class="btn btn-glass btn-sm" onclick="Auth.logout()">Logout</button></li>
+        </ul>
+    </nav>
+
+    <aside class="sidebar" id="sidebar">
+        <nav class="sidebar-nav">
+            <a href="admin-dashboard.html" class="sidebar-link"><span class="sidebar-icon">📊</span> Dashboard</a>
+            <a href="students.html" class="sidebar-link active"><span class="sidebar-icon">👨‍🎓</span> Students</a>
+            <a href="faculty.html" class="sidebar-link"><span class="sidebar-icon">👨‍🏫</span> Faculty</a>
+            <a href="subjects.html" class="sidebar-link"><span class="sidebar-icon">📚</span> Subjects</a>
+            <a href="attendance.html" class="sidebar-link"><span class="sidebar-icon">📅</span> Attendance</a>
+            <a href="marks.html" class="sidebar-link"><span class="sidebar-icon">📝</span> Marks</a>
+            <a href="fees.html" class="sidebar-link"><span class="sidebar-icon">💰</span> Fees</a>
+            <a href="circulars.html" class="sidebar-link"><span class="sidebar-icon">📢</span> Circulars</a>
+            <a href="timetable.html" class="sidebar-link"><span class="sidebar-icon">📆</span> Timetable</a>
+            <a href="settings.html" class="sidebar-link"><span class="sidebar-icon">⚙️</span> Settings</a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header flex justify-between items-center">
+            <div>
+                <h1 class="page-title">Student Management</h1>
+                <p class="page-subtitle">Add, edit, and manage student records.</p>
+            </div>
+            <button class="btn btn-primary" onclick="openModal()">➕ Add Student</button>
+        </div>
+
+        <!-- Filters & Export -->
+        <div class="card mb-6">
+            <div class="flex gap-4 flex-wrap items-center justify-between">
+                <div class="flex gap-4 flex-wrap items-center">
+                    <input type="text" class="form-control" id="searchInput"
+                        placeholder="🔍 Search by name or roll number..." style="max-width: 300px;"
+                        oninput="filterStudents()">
+                    <select class="form-control" id="classFilter" style="max-width: 150px;" onchange="filterStudents()">
+                        <option value="">All Classes</option>
+                    </select>
+                </div>
+                <div class="flex gap-2">
+                    <button class="btn btn-glass" onclick="Exports.exportStudents('csv')">📥 CSV</button>
+                    <button class="btn btn-glass" onclick="Exports.exportStudents('excel')">📊 Excel</button>
+                    <button class="btn btn-glass" onclick="exportTablePDF()">📄 PDF</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Students Table -->
+        <div class="table-container">
+            <table class="data-table" id="studentsDataTable">
+                <thead>
+                    <tr>
+                        <th>Roll No</th>
+                        <th>Name</th>
+                        <th>Class</th>
+                        <th>Guardian</th>
+                        <th>Phone</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="studentsTable">
+                    <tr>
+                        <td colspan="7" class="text-center">Loading...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Add/Edit Modal -->
+    <div class="modal-backdrop" id="studentModal">
+        <div class="modal" style="max-width: 650px;">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Add New Student</h3>
+                <button class="modal-close" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="studentForm" onsubmit="saveStudent(event)">
+                    <input type="hidden" id="studentId">
+                    <div class="grid grid-2 gap-4">
+                        <div class="form-group">
+                            <label class="form-label">Full Name *</label>
+                            <input type="text" class="form-control" id="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Roll Number *</label>
+                            <input type="text" class="form-control" id="rollNo" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Class *</label>
+                            <select class="form-control" id="classId" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Section</label>
+                            <select class="form-control" id="sectionId"></select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Date of Birth *</label>
+                            <input type="date" class="form-control" id="dob" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Gender</label>
+                            <select class="form-control" id="gender">
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Blood Group</label>
+                            <select class="form-control" id="bloodGroup">
+                                <option value="">Select</option>
+                                <option value="A+">A+</option>
+                                <option value="A-">A-</option>
+                                <option value="B+">B+</option>
+                                <option value="B-">B-</option>
+                                <option value="O+">O+</option>
+                                <option value="O-">O-</option>
+                                <option value="AB+">AB+</option>
+                                <option value="AB-">AB-</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Guardian Name *</label>
+                            <input type="text" class="form-control" id="guardianName" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Guardian Phone *</label>
+                            <input type="tel" class="form-control" id="guardianPhone" required
+                                placeholder="+91 XXXXXXXXXX">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Guardian Email</label>
+                            <input type="email" class="form-control" id="guardianEmail" placeholder="email@example.com">
+                        </div>
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label class="form-label">Address</label>
+                            <textarea class="form-control" id="address" rows="2"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="border: none; padding: 0; margin-top: var(--space-4);">
+                        <button type="button" class="btn btn-glass" onclick="closeModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Student</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/db.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/schema.js"></script>
+    <script src="js/exports.js"></script>
+    <script src="js/marks-card.js"></script>
+    <script>
+        let students = [];
+        let classes = [];
+        let sections = [];
+        let filteredStudents = [];
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!Auth.requireRole(['admin', 'developer'])) return;
+            await loadData();
+        });
+
+        async function loadData() {
+            await DB.ready();
+            classes = await DB.getAll('classes');
+            sections = await DB.getAll('sections');
+
+            // Populate class filter
+            const classFilter = document.getElementById('classFilter');
+            classFilter.innerHTML = '<option value="">All Classes</option>' +
+                classes.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+
+            // Populate form class dropdown
+            const classSelect = document.getElementById('classId');
+            classSelect.innerHTML = '<option value="">Select Class</option>' +
+                classes.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+
+            classSelect.addEventListener('change', updateSections);
+
+            await loadStudents();
+        }
+
+        function updateSections() {
+            const classId = document.getElementById('classId').value;
+            const classSections = sections.filter(s => s.classId === classId);
+            const sectionSelect = document.getElementById('sectionId');
+            sectionSelect.innerHTML = '<option value="">Select Section</option>' +
+                classSections.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+        }
+
+        async function loadStudents() {
+            students = await DB.getAll('students');
+            filteredStudents = [...students];
+            renderStudents();
+        }
+
+        function filterStudents() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const classId = document.getElementById('classFilter').value;
+
+            filteredStudents = students.filter(s => {
+                const matchSearch = !search ||
+                    s.name.toLowerCase().includes(search) ||
+                    s.rollNo.toLowerCase().includes(search);
+                const matchClass = !classId || s.classId === classId;
+                return matchSearch && matchClass;
+            });
+
+            renderStudents();
+        }
+
+        function renderStudents() {
+            const tbody = document.getElementById('studentsTable');
+
+            if (filteredStudents.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center">No students found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = filteredStudents.map(s => {
+                const cls = classes.find(c => c.id === s.classId);
+                const sec = sections.find(sec => sec.id === s.sectionId);
+                const className = cls ? `${cls.name}${sec ? '-' + sec.name : ''}` : (s.class || '-');
+
+                return `
+          <tr>
+            <td><code>${s.rollNo}</code></td>
+            <td>
+              <div style="font-weight: 600;">${s.name}</div>
+              <div style="font-size: var(--text-xs); color: #666;">${s.gender || ''} | ${s.bloodGroup || '-'}</div>
+            </td>
+            <td><span class="badge badge-primary">${className}</span></td>
+            <td>${s.guardianName || '-'}</td>
+            <td>${s.guardianPhone || '-'}</td>
+            <td><span class="badge ${s.status === 'Active' ? 'badge-success' : 'badge-warning'}">${s.status || 'Active'}</span></td>
+            <td>
+              <div class="flex gap-1">
+                <button class="btn btn-sm btn-glass" onclick="editStudent('${s.id}')" title="Edit">✏️</button>
+                <button class="btn btn-sm btn-accent" onclick="generateMarksCard('${s.id}')" title="Marks Card">📄</button>
+                <button class="btn btn-sm btn-danger" onclick="deleteStudent('${s.id}')" title="Delete">🗑️</button>
+              </div>
+            </td>
+          </tr>
+        `;
+            }).join('');
+        }
+
+        function openModal() {
+            document.getElementById('modalTitle').textContent = 'Add New Student';
+            document.getElementById('studentForm').reset();
+            document.getElementById('studentId').value = '';
+            document.getElementById('studentModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('studentModal').classList.remove('active');
+        }
+
+        async function editStudent(id) {
+            const student = await DB.get('students', id);
+            if (!student) return;
+
+            document.getElementById('modalTitle').textContent = 'Edit Student';
+            document.getElementById('studentId').value = student.id;
+            document.getElementById('name').value = student.name;
+            document.getElementById('rollNo').value = student.rollNo;
+            document.getElementById('classId').value = student.classId || '';
+            updateSections();
+            setTimeout(() => {
+                document.getElementById('sectionId').value = student.sectionId || '';
+            }, 100);
+            document.getElementById('dob').value = student.dob || '';
+            document.getElementById('gender').value = student.gender || 'Male';
+            document.getElementById('bloodGroup').value = student.bloodGroup || '';
+            document.getElementById('guardianName').value = student.guardianName || '';
+            document.getElementById('guardianPhone').value = student.guardianPhone || '';
+            document.getElementById('guardianEmail').value = student.guardianEmail || '';
+            document.getElementById('address').value = student.address || '';
+
+            document.getElementById('studentModal').classList.add('active');
+        }
+
+        async function saveStudent(e) {
+            e.preventDefault();
+
+            const id = document.getElementById('studentId').value;
+            const user = Auth.currentUser();
+
+            const data = {
+                name: document.getElementById('name').value.trim(),
+                rollNo: document.getElementById('rollNo').value.trim(),
+                classId: document.getElementById('classId').value,
+                sectionId: document.getElementById('sectionId').value,
+                dob: document.getElementById('dob').value,
+                gender: document.getElementById('gender').value,
+                bloodGroup: document.getElementById('bloodGroup').value,
+                guardianName: document.getElementById('guardianName').value.trim(),
+                guardianPhone: document.getElementById('guardianPhone').value.trim(),
+                guardianEmail: document.getElementById('guardianEmail').value.trim(),
+                address: document.getElementById('address').value.trim(),
+                status: 'Active',
+                academicYearId: 'ay_2024'
+            };
+
+            try {
+                if (id) {
+                    const existing = await DB.get('students', id);
+                    await DB.update('students', { ...existing, ...data }, user?.userId);
+                    Utils.showToast('Student updated successfully', 'success');
+                } else {
+                    data.id = DB.generateId('stu');
+                    await DB.add('students', data, user?.userId);
+                    Utils.showToast('Student added successfully', 'success');
+                }
+
+                closeModal();
+                await loadStudents();
+            } catch (error) {
+                Utils.showToast('Error saving student: ' + error.message, 'error');
+            }
+        }
+
+        async function deleteStudent(id) {
+            const confirm = await Utils.confirm('Delete this student? This action cannot be undone.', 'Delete');
+            if (confirm) {
+                await DB.delete('students', id);
+                Utils.showToast('Student deleted', 'success');
+                await loadStudents();
+            }
+        }
+
+        function generateMarksCard(studentId) {
+            MarksCard.generate(studentId);
+        }
+
+        function exportTablePDF() {
+            const table = document.getElementById('studentsDataTable');
+            Exports.toPDF(table, 'Student List');
+        }
+    </script>
+</body>
+
+</html>

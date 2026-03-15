@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gallery - APNA SCHOOL</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: var(--space-4);
+        }
+
+        .gallery-item {
+            position: relative;
+            height: 220px;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            cursor: pointer;
+            background: linear-gradient(135deg, rgba(90, 63, 255, 0.2), rgba(77, 227, 255, 0.2));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition-base);
+        }
+
+        .gallery-item:hover {
+            transform: scale(1.02);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .gallery-item .icon {
+            font-size: 4rem;
+            opacity: 0.7;
+        }
+
+        .gallery-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(10, 15, 44, 0.9));
+            padding: var(--space-4);
+            color: white;
+        }
+
+        .gallery-overlay h4 {
+            font-size: var(--text-base);
+            margin-bottom: var(--space-1);
+        }
+
+        .gallery-overlay p {
+            font-size: var(--text-sm);
+            opacity: 0.8;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="animated-bg">
+        <div class="floating-shapes">
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+        </div>
+    </div>
+
+    <nav class="navbar">
+        <a href="index.html" class="navbar-brand">🎓 APNA SCHOOL</a>
+        <button class="menu-toggle" onclick="document.getElementById('mainNav').classList.toggle('active')">
+            <span></span><span></span><span></span>
+        </button>
+        <ul class="navbar-nav" id="mainNav">
+            <li><a href="index.html" class="nav-link">Home</a></li>
+            <li><a href="about.html" class="nav-link">About</a></li>
+            <li><a href="facilities.html" class="nav-link">Facilities</a></li>
+            <li><a href="clubs.html" class="nav-link">Clubs</a></li>
+            <li><a href="events.html" class="nav-link">Events</a></li>
+            <li><a href="gallery.html" class="nav-link active">Gallery</a></li>
+            <li><a href="contact.html" class="nav-link">Contact</a></li>
+            <li><a href="login.html" class="btn btn-accent btn-sm">Login</a></li>
+        </ul>
+    </nav>
+
+    <main class="main-content no-sidebar" style="margin-top: 100px;">
+        <div class="container">
+            <div class="text-center mb-8">
+                <h1 style="font-size: var(--text-5xl); color: white; margin-bottom: var(--space-4);">Photo <span
+                        class="text-gradient">Gallery</span></h1>
+                <p style="color: rgba(255,255,255,0.8); font-size: var(--text-xl);">Capturing memories and milestones at
+                    APNA SCHOOL.</p>
+            </div>
+
+            <!-- Category Filter -->
+            <div class="card mb-6">
+                <div class="flex gap-3 flex-wrap">
+                    <button class="btn btn-primary" onclick="filterGallery('all')">All</button>
+                    <button class="btn btn-glass" onclick="filterGallery('campus')">Campus</button>
+                    <button class="btn btn-glass" onclick="filterGallery('events')">Events</button>
+                    <button class="btn btn-glass" onclick="filterGallery('sports')">Sports</button>
+                    <button class="btn btn-glass" onclick="filterGallery('cultural')">Cultural</button>
+                    <button class="btn btn-glass" onclick="filterGallery('labs')">Labs</button>
+                </div>
+            </div>
+
+            <!-- Gallery Grid -->
+            <div class="gallery-grid">
+                <div class="gallery-item" data-category="campus">
+                    <span class="icon">🏫</span>
+                    <div class="gallery-overlay">
+                        <h4>Main Building</h4>
+                        <p>Campus entrance view</p>
+                    </div>
+                </div>
+                <div class="gallery-item" data-category="events">
+                    <span class="icon">🎓</span>
+                    <div class="gallery-overlay">
+                        <h4>Annual Day 2024</h4>
+                        <p>Prize distribution ceremony</p>
+                    </div>
+                </div>
+                <div class="gallery-item" data-category="sports">
+                    <span class="icon">🏆</span>
+                    <div class="gallery-overlay">
+                        <h4>Sports Meet</h4>
+                        <p>Athletics competition</p>
+                    </div>
+                </div>
+                <div class="gallery-item" data-category="labs">
+                    <span class="icon">🔬</span>
+                    <div class="gallery-overlay">
+                        <h4>Science Lab</h4>
+                        <p>Students in chemistry lab</p>
+                    </div>
+                </div>
+                <div class="gallery-item" data-category="cultural">
+                    <span class="icon">🎭</span>
+                    <div class="gallery-overlay">
+                        <h4>Cultural Fest</h4>
+                        <p>Dance performance</p>
+                    </div>
+                </div>
+                <div class="gallery-item" data-category="campus">
+                    <span class="icon">📚</span>
+                    <div class="gallery-overlay">
+                        <h4>Library</h4>
+                        <p>Reading hall</p>
+                    </div>
+                </div>
+                <div class="gallery-item" data-category="sports">
+                    <span class="icon">⚽</span>
+                    <div class="gallery-overlay">
+                        <h4>Football Match</h4>
+                        <p>Inter-house tournament</p>
+                    </div>
+                </div>
+                <div class="gallery-item" data-category="events">
+                    <span class="icon">🎤</span>
+                    <div class="gallery-overlay">
+                        <h4>Debate Competition</h4>
+                        <p>Inter-school debate</p>
+                    </div>
+                </div>
+                <div class="gallery-item" data-category="labs">
+                    <span class="icon">💻</span>
+                    <div class="gallery-overlay">
+                        <h4>Computer Lab</h4>
+                        <p>Programming class</p>
+                    </div>
+                </div>
+                <div class="gallery-item" data-category="cultural">
+                    <span class="icon">🎵</span>
+                    <div class="gallery-overlay">
+                        <h4>Music Program</h4>
+                        <p>Orchestra performance</p>
+                    </div>
+                </div>
+                <div class="gallery-item" data-category="campus">
+                    <span class="icon">🌳</span>
+                    <div class="gallery-overlay">
+                        <h4>School Garden</h4>
+                        <p>Eco-friendly campus</p>
+                    </div>
+                </div>
+                <div class="gallery-item" data-category="sports">
+                    <span class="icon">🏀</span>
+                    <div class="gallery-overlay">
+                        <h4>Basketball Court</h4>
+                        <p>State-level champions</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="card mt-8 text-center"
+                style="background: linear-gradient(135deg, var(--color-royal-indigo), var(--color-primary-light)); color: white;">
+                <div class="grid grid-4 gap-6">
+                    <div>
+                        <div style="font-size: var(--text-4xl); font-weight: bold;">500+</div>
+                        <div style="opacity: 0.8;">Photos</div>
+                    </div>
+                    <div>
+                        <div style="font-size: var(--text-4xl); font-weight: bold;">50+</div>
+                        <div style="opacity: 0.8;">Events Captured</div>
+                    </div>
+                    <div>
+                        <div style="font-size: var(--text-4xl); font-weight: bold;">25+</div>
+                        <div style="opacity: 0.8;">Years of Memories</div>
+                    </div>
+                    <div>
+                        <div style="font-size: var(--text-4xl); font-weight: bold;">100+</div>
+                        <div style="opacity: 0.8;">Award Ceremonies</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer
+        style="background: rgba(10, 15, 44, 0.95); padding: var(--space-8); text-align: center; color: rgba(255,255,255,0.7); margin-top: var(--space-12);">
+        <p>© 2025 APNA SCHOOL. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+        function filterGallery(category) {
+            const items = document.querySelectorAll('.gallery-item');
+            const buttons = document.querySelectorAll('.card .btn');
+
+            buttons.forEach(btn => {
+                btn.classList.remove('btn-primary');
+                btn.classList.add('btn-glass');
+            });
+            event.target.classList.remove('btn-glass');
+            event.target.classList.add('btn-primary');
+
+            items.forEach(item => {
+                if (category === 'all' || item.dataset.category === category) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

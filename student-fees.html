@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fee Status - APNA SCHOOL</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <div class="animated-bg">
+        <div class="floating-shapes">
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+        </div>
+    </div>
+
+    <nav class="navbar">
+        <a href="index.html" class="navbar-brand">🎓 APNA SCHOOL</a>
+        <button class="menu-toggle" onclick="toggleSidebar()">
+            <span></span><span></span><span></span>
+        </button>
+        <ul class="navbar-nav">
+            <li><span class="nav-link" id="userName">Student</span></li>
+            <li><button class="btn btn-glass btn-sm" onclick="Auth.logout()">Logout</button></li>
+        </ul>
+    </nav>
+
+    <aside class="sidebar" id="sidebar">
+        <nav class="sidebar-nav" id="sidebarLinks">
+            <!-- Populated by JS -->
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Fee Status</h1>
+            <p class="page-subtitle">Track your fee payments and pending dues.</p>
+        </div>
+
+        <div class="grid grid-2 mb-8">
+            <div class="card p-6 flex flex-col items-center justify-center bg-white">
+                <div style="font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: #666;">Total
+                    Outstanding</div>
+                <div id="outstandingBalance"
+                    style="font-size: 42px; font-weight: 800; color: var(--color-danger); margin: 10px 0;">₹ 0</div>
+                <button class="btn btn-primary" onclick="alert('Payment Gateway Integration Coming Soon!')">Pay
+                    Now</button>
+            </div>
+
+            <div class="card p-6">
+                <h3 class="card-title mb-4">Payment Methods</h3>
+                <div class="flex flex-col gap-3">
+                    <div class="p-3 border rounded flex items-center gap-3">
+                        <div style="font-size:24px;">🏦</div>
+                        <div>
+                            <div style="font-weight:bold;">Bank Transfer</div>
+                            <div style="font-size:12px; color:#666;">Account: 1234567890 (IFSC: APNA001)</div>
+                        </div>
+                    </div>
+                    <div class="p-3 border rounded flex items-center gap-3">
+                        <div style="font-size:24px;">📱</div>
+                        <div>
+                            <div style="font-weight:bold;">UPI / QR Code</div>
+                            <div style="font-size:12px; color:#666;">Scan QR at school office</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">📜 Fee History & Invoices</h3>
+            </div>
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Invoice ID</th>
+                            <th>Description</th>
+                            <th>Due Date</th>
+                            <th>Amount</th>
+                            <th>Paid</th>
+                            <th>Balance</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="feesBody">
+                        <!-- Loaded dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/db.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/utils.js"></script>
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!Auth.requireRole(['student', 'parent'])) return;
+
+            const user = Auth.currentUser();
+            document.getElementById('userName').textContent = user.name;
+            setupSidebar(user.role);
+
+            await Utils.guard(async () => {
+                const params = new URLSearchParams(window.location.search);
+                const studentId = params.get('id') || user.linkedId;
+                await loadFees(studentId);
+            });
+        });
+
+        function setupSidebar(role) {
+            const sidebar = document.getElementById('sidebarLinks');
+            if (role === 'student') {
+                sidebar.innerHTML = `
+                    <a href="student-dashboard.html" class="sidebar-link"><span class="sidebar-icon">📊</span> Dashboard</a>
+                    <a href="student-attendance.html" class="sidebar-link"><span class="sidebar-icon">📅</span> My Attendance</a>
+                    <a href="student-marks.html" class="sidebar-link"><span class="sidebar-icon">📝</span> Results & Marks</a>
+                    <a href="student-timetable.html" class="sidebar-link"><span class="sidebar-icon">📆</span> Class Timetable</a>
+                    <a href="student-fees.html" class="sidebar-link active"><span class="sidebar-icon">💰</span> Fee Status</a>
+                    <a href="student-messages.html" class="sidebar-link"><span class="sidebar-icon">💬</span> Messages</a>
+                `;
+            } else if (role === 'parent') {
+                sidebar.innerHTML = `
+                    <a href="parent-dashboard.html" class="sidebar-link"><span class="sidebar-icon">👨‍👩‍👧‍👦</span> Dashboard</a>
+                    <a href="student-fees.html" class="sidebar-link active"><span class="sidebar-icon">💰</span> Fee Payment</a>
+                    <a href="student-attendance.html" class="sidebar-link"><span class="sidebar-icon">📅</span> Attendance</a>
+                    <a href="student-marks.html" class="sidebar-link"><span class="sidebar-icon">📝</span> Report Cards</a>
+                    <a href="student-messages.html" class="sidebar-link"><span class="sidebar-icon">💬</span> Messages</a>
+                `;
+            }
+        }
+
+        async function loadFees(studentId) {
+            await DB.ready();
+            const allFees = await DB.getAll('fees');
+            const myFees = allFees.filter(f => f.studentId === studentId);
+
+            const tbody = document.getElementById('feesBody');
+
+            if (myFees.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted">No fee records found.</td></tr>';
+                return;
+            }
+
+            let totalBalance = 0;
+
+            tbody.innerHTML = myFees.map(f => {
+                totalBalance += f.balance;
+
+                let badgeClass = 'badge-warning';
+                if (f.status === 'Paid') badgeClass = 'badge-success';
+                if (f.status === 'Overdue') badgeClass = 'badge-danger';
+
+                return `
+                    <tr>
+                        <td>#INV-${f.id.split('_')[1].substring(0, 6)}</td>
+                        <td>${f.type || 'Tuition Fee'}</td>
+                        <td>${new Date(f.dueDate).toLocaleDateString()}</td>
+                        <td>₹ ${f.amount.toLocaleString()}</td>
+                        <td>₹ ${f.paid.toLocaleString()}</td>
+                        <td style="font-weight:bold; color: var(--color-danger);">₹ ${f.balance.toLocaleString()}</td>
+                        <td><span class="badge ${badgeClass}">${f.status}</span></td>
+                        <td>
+                            ${f.balance > 0 ? '<button class="btn btn-sm btn-accent">Pay</button>' : '<button class="btn btn-sm btn-glass" disabled>Receipt</button>'}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            if (totalBalance > 0) {
+                document.getElementById('outstandingBalance').textContent = '₹ ' + totalBalance.toLocaleString();
+            } else {
+                document.getElementById('outstandingBalance').textContent = '₹ 0';
+                document.getElementById('outstandingBalance').style.color = 'var(--color-success)';
+            }
+        }
+    </script>
+</body>
+
+</html>

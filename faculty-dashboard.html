@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty Dashboard - APNA SCHOOL</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <div class="animated-bg">
+        <div class="floating-shapes">
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+        </div>
+    </div>
+
+    <nav class="navbar">
+        <a href="index.html" class="navbar-brand">🎓 APNA SCHOOL</a>
+        <ul class="navbar-nav">
+            <li><span class="nav-link" id="userName">Faculty</span></li>
+            <li><button class="btn btn-glass btn-sm" onclick="Auth.logout()">Logout</button></li>
+        </ul>
+    </nav>
+
+    <main class="main-content no-sidebar">
+        <div class="page-header">
+            <h1 class="page-title">Faculty Dashboard</h1>
+            <p class="page-subtitle">Manage your classes, attendance, and student marks.</p>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="grid grid-4 mb-8">
+            <a href="attendance.html" class="stat-card" style="text-decoration: none; cursor: pointer;">
+                <div class="stat-icon primary">📅</div>
+                <div style="font-size: var(--text-xl); font-weight: bold; margin-top: var(--space-2);">Mark Attendance
+                </div>
+                <div class="stat-label">Today's Classes</div>
+            </a>
+            <a href="marks.html" class="stat-card" style="text-decoration: none; cursor: pointer;">
+                <div class="stat-icon accent">📝</div>
+                <div style="font-size: var(--text-xl); font-weight: bold; margin-top: var(--space-2);">Enter Marks</div>
+                <div class="stat-label">Exam Results</div>
+            </a>
+            <div class="stat-card">
+                <div class="stat-icon success">👨‍🎓</div>
+                <div class="stat-value" id="totalStudents">0</div>
+                <div class="stat-label">My Students</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon purple">📚</div>
+                <div class="stat-value" id="subjectCount">0</div>
+                <div class="stat-label">Subjects</div>
+            </div>
+        </div>
+
+        <div class="grid grid-2">
+            <!-- Profile -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">👤 My Profile</h3>
+                </div>
+                <div id="profileSection">
+                    <div
+                        style="display: flex; gap: var(--space-4); padding: var(--space-3) 0; border-bottom: 1px solid rgba(0,0,0,0.08);">
+                        <span style="width: 120px; color: #666;">Name:</span>
+                        <strong id="facultyName">-</strong>
+                    </div>
+                    <div
+                        style="display: flex; gap: var(--space-4); padding: var(--space-3) 0; border-bottom: 1px solid rgba(0,0,0,0.08);">
+                        <span style="width: 120px; color: #666;">Email:</span>
+                        <strong id="facultyEmail">-</strong>
+                    </div>
+                    <div
+                        style="display: flex; gap: var(--space-4); padding: var(--space-3) 0; border-bottom: 1px solid rgba(0,0,0,0.08);">
+                        <span style="width: 120px; color: #666;">Phone:</span>
+                        <strong id="facultyPhone">-</strong>
+                    </div>
+                    <div style="display: flex; gap: var(--space-4); padding: var(--space-3) 0;">
+                        <span style="width: 120px; color: #666;">Qualification:</span>
+                        <strong id="facultyQual">-</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Assigned Subjects -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">📚 My Subjects</h3>
+                </div>
+                <div id="subjectsSection">
+                    <p class="text-muted">Loading...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assigned Classes -->
+        <div class="card mt-8">
+            <div class="card-header">
+                <h3 class="card-title">🏫 Assigned Classes</h3>
+            </div>
+            <div id="classesSection" class="grid grid-3 gap-4">
+                <p class="text-muted">Loading...</p>
+            </div>
+        </div>
+
+        <!-- Today's Schedule -->
+        <div class="card mt-8">
+            <div class="card-header flex justify-between items-center">
+                <h3 class="card-title">📆 Today's Schedule</h3>
+                <span class="badge badge-primary" id="todayDate">-</span>
+            </div>
+            <div class="table-container" style="box-shadow: none;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Period</th>
+                            <th>Time</th>
+                            <th>Subject</th>
+                            <th>Class</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="scheduleTable">
+                        <tr>
+                            <td>1</td>
+                            <td>9:00 - 9:45</td>
+                            <td>Mathematics</td>
+                            <td>10A</td>
+                            <td><a href="attendance.html" class="btn btn-sm btn-glass">Mark Attendance</a></td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>10:30 - 11:15</td>
+                            <td>Mathematics</td>
+                            <td>9A</td>
+                            <td><a href="attendance.html" class="btn btn-sm btn-glass">Mark Attendance</a></td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td>12:00 - 12:45</td>
+                            <td>Physics</td>
+                            <td>10B</td>
+                            <td><a href="attendance.html" class="btn btn-sm btn-glass">Mark Attendance</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/db.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/utils.js"></script>
+    <script>
+        let facultyData = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!Auth.requireRole('faculty')) return;
+
+            const user = Auth.currentUser();
+            document.getElementById('userName').textContent = user.name;
+
+            await loadFacultyData(user.linkedId);
+        });
+
+        async function loadFacultyData(facultyId) {
+            await DB.ready();
+
+            facultyData = await DB.get('faculty', facultyId);
+            if (!facultyData) {
+                Utils.showToast('Faculty record not found', 'error');
+                return;
+            }
+
+            // Profile
+            document.getElementById('facultyName').textContent = facultyData.name;
+            document.getElementById('facultyEmail').textContent = facultyData.email;
+            document.getElementById('facultyPhone').textContent = facultyData.phone;
+            document.getElementById('facultyQual').textContent = facultyData.qualification || 'N/A';
+
+            // Today's date
+            document.getElementById('todayDate').textContent = Utils.formatDate(new Date());
+
+            await loadSubjects();
+            await loadClasses();
+            await loadStats();
+        }
+
+        async function loadSubjects() {
+            const allSubjects = await DB.getAll('subjects');
+            const section = document.getElementById('subjectsSection');
+
+            if (!facultyData.subjects || facultyData.subjects.length === 0) {
+                section.innerHTML = '<p class="text-muted">No subjects assigned.</p>';
+                return;
+            }
+
+            section.innerHTML = facultyData.subjects.map(subId => {
+                const subject = allSubjects.find(s => s.id === subId);
+                return `
+          <div style="display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) 0; border-bottom: 1px solid rgba(0,0,0,0.08);">
+            <span style="font-size: 1.5rem;">${subject ? subject.icon : '📖'}</span>
+            <span>${subject ? subject.name : subId}</span>
+          </div>
+        `;
+            }).join('');
+
+            document.getElementById('subjectCount').textContent = facultyData.subjects.length;
+        }
+
+        async function loadClasses() {
+            const section = document.getElementById('classesSection');
+            const classes = facultyData.assignedClasses || ['9A', '10A', '10B'];
+
+            const students = await DB.getAll('students');
+
+            section.innerHTML = classes.map(cls => {
+                const count = students.filter(s => s.class === cls).length;
+                return `
+          <div style="background: rgba(90, 63, 255, 0.1); padding: var(--space-4); border-radius: var(--radius-md); text-align: center;">
+            <div style="font-size: var(--text-2xl); font-weight: bold;">Class ${cls}</div>
+            <div style="color: #666;">${count} students</div>
+          </div>
+        `;
+            }).join('');
+        }
+
+        async function loadStats() {
+            const students = await DB.getAll('students');
+            const classes = facultyData.assignedClasses || ['9A', '10A', '10B'];
+            const myStudents = students.filter(s => classes.includes(s.class));
+            document.getElementById('totalStudents').textContent = myStudents.length;
+        }
+    </script>
+</body>
+
+</html>

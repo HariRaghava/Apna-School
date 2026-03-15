@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Circulars & Announcements - APNA SCHOOL</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <div class="animated-bg">
+        <div class="floating-shapes">
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+        </div>
+    </div>
+
+    <nav class="navbar">
+        <a href="index.html" class="navbar-brand">🎓 APNA SCHOOL</a>
+        <button class="menu-toggle" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
+        <ul class="navbar-nav">
+            <li><button class="btn btn-glass btn-sm" onclick="Auth.logout()">Logout</button></li>
+        </ul>
+    </nav>
+
+    <aside class="sidebar" id="sidebar">
+        <nav class="sidebar-nav">
+            <a href="admin-dashboard.html" class="sidebar-link"><span class="sidebar-icon">📊</span> Dashboard</a>
+            <a href="students.html" class="sidebar-link"><span class="sidebar-icon">👨‍🎓</span> Students</a>
+            <a href="faculty.html" class="sidebar-link"><span class="sidebar-icon">👨‍🏫</span> Faculty</a>
+            <a href="subjects.html" class="sidebar-link"><span class="sidebar-icon">📚</span> Subjects</a>
+            <a href="attendance.html" class="sidebar-link"><span class="sidebar-icon">📅</span> Attendance</a>
+            <a href="marks.html" class="sidebar-link"><span class="sidebar-icon">📝</span> Marks</a>
+            <a href="fees.html" class="sidebar-link"><span class="sidebar-icon">💰</span> Fees</a>
+            <a href="circulars.html" class="sidebar-link active"><span class="sidebar-icon">📢</span> Circulars</a>
+            <a href="settings.html" class="sidebar-link"><span class="sidebar-icon">⚙️</span> Settings</a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header flex justify-between items-center">
+            <div>
+                <h1 class="page-title">Circulars & Announcements</h1>
+                <p class="page-subtitle">Publish and manage school announcements.</p>
+            </div>
+            <button class="btn btn-primary" id="addCircularBtn" onclick="openCircularModal()" style="display: none;">➕
+                New Circular</button>
+        </div>
+
+        <!-- Filter -->
+        <div class="card mb-6">
+            <div class="flex gap-4 flex-wrap items-center">
+                <select class="form-control" id="filterType" style="max-width: 200px;" onchange="loadCirculars()">
+                    <option value="">All Types</option>
+                    <option value="Announcement">📢 Announcements</option>
+                    <option value="Notice">📋 Notices</option>
+                    <option value="Event">🎉 Events</option>
+                    <option value="Holiday">🏖️ Holidays</option>
+                    <option value="Exam">📝 Exams</option>
+                    <option value="Fee">💰 Fee Related</option>
+                </select>
+                <select class="form-control" id="filterPriority" style="max-width: 150px;" onchange="loadCirculars()">
+                    <option value="">All Priority</option>
+                    <option value="Urgent">🔴 Urgent</option>
+                    <option value="High">🟠 High</option>
+                    <option value="Normal">🟢 Normal</option>
+                    <option value="Low">⚪ Low</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Circulars List -->
+        <div id="circularsList" class="grid gap-4">
+            <p class="text-muted">Loading circulars...</p>
+        </div>
+    </main>
+
+    <!-- Circular Modal -->
+    <div class="modal-backdrop" id="circularModal">
+        <div class="modal" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Create Circular</h3>
+                <button class="modal-close" onclick="closeCircularModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="circularForm" onsubmit="saveCircular(event)">
+                    <input type="hidden" id="circularId">
+                    <div class="form-group">
+                        <label class="form-label">Title *</label>
+                        <input type="text" class="form-control" id="circularTitle" required
+                            placeholder="Enter circular title">
+                    </div>
+                    <div class="grid grid-2 gap-4">
+                        <div class="form-group">
+                            <label class="form-label">Type *</label>
+                            <select class="form-control" id="circularType" required>
+                                <option value="Announcement">📢 Announcement</option>
+                                <option value="Notice">📋 Notice</option>
+                                <option value="Event">🎉 Event</option>
+                                <option value="Holiday">🏖️ Holiday</option>
+                                <option value="Exam">📝 Exam</option>
+                                <option value="Fee">💰 Fee Related</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Priority</label>
+                            <select class="form-control" id="circularPriority">
+                                <option value="Normal">Normal</option>
+                                <option value="Low">Low</option>
+                                <option value="High">High</option>
+                                <option value="Urgent">Urgent</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Content *</label>
+                        <textarea class="form-control" id="circularContent" rows="5" required
+                            placeholder="Enter circular content..."></textarea>
+                    </div>
+                    <div class="grid grid-2 gap-4">
+                        <div class="form-group">
+                            <label class="form-label">Target Roles</label>
+                            <div style="display: flex; flex-wrap: wrap; gap: var(--space-2);">
+                                <label style="display: flex; align-items: center; gap: 5px;">
+                                    <input type="checkbox" name="targetRoles" value="all" checked> All
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px;">
+                                    <input type="checkbox" name="targetRoles" value="student"> Students
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px;">
+                                    <input type="checkbox" name="targetRoles" value="parent"> Parents
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px;">
+                                    <input type="checkbox" name="targetRoles" value="faculty"> Faculty
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Expires On</label>
+                            <input type="date" class="form-control" id="circularExpiry">
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="padding: 0; border: none; margin-top: var(--space-4);">
+                        <button type="button" class="btn btn-glass" onclick="closeCircularModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Publish Circular</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/db.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/schema.js"></script>
+    <script>
+        let circulars = [];
+        let userRole = '';
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!Auth.isLoggedIn()) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const user = Auth.currentUser();
+            userRole = user?.role || '';
+
+            // Show add button for admin/faculty
+            if (['admin', 'developer'].includes(userRole)) {
+                document.getElementById('addCircularBtn').style.display = 'block';
+            }
+
+            await loadCirculars();
+        });
+
+        async function loadCirculars() {
+            await DB.ready();
+            circulars = await DB.getAll('circulars');
+
+            const filterType = document.getElementById('filterType').value;
+            const filterPriority = document.getElementById('filterPriority').value;
+
+            let filtered = circulars;
+
+            // Filter by type
+            if (filterType) {
+                filtered = filtered.filter(c => c.type === filterType);
+            }
+
+            // Filter by priority
+            if (filterPriority) {
+                filtered = filtered.filter(c => c.priority === filterPriority);
+            }
+
+            // Filter by role access
+            if (!['admin', 'developer'].includes(userRole)) {
+                filtered = filtered.filter(c => {
+                    const targets = c.targetRoles || ['all'];
+                    return targets.includes('all') || targets.includes(userRole);
+                });
+            }
+
+            // Filter expired
+            const now = new Date();
+            filtered = filtered.filter(c => {
+                if (!c.expiresAt) return true;
+                return new Date(c.expiresAt) > now;
+            });
+
+            // Sort by date (newest first)
+            filtered.sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
+
+            displayCirculars(filtered);
+        }
+
+        function displayCirculars(list) {
+            const container = document.getElementById('circularsList');
+
+            if (list.length === 0) {
+                container.innerHTML = `
+          <div class="card" style="text-align: center; padding: var(--space-8);">
+            <div style="font-size: 4rem; margin-bottom: var(--space-4);">📢</div>
+            <h3>No Circulars</h3>
+            <p style="color: #666;">There are no announcements at this time.</p>
+          </div>
+        `;
+                return;
+            }
+
+            const priorityColors = {
+                'Urgent': '#FF5A5A',
+                'High': '#FF8C42',
+                'Normal': '#00D9A5',
+                'Low': '#999'
+            };
+
+            const typeIcons = {
+                'Announcement': '📢',
+                'Notice': '📋',
+                'Event': '🎉',
+                'Holiday': '🏖️',
+                'Exam': '📝',
+                'Fee': '💰'
+            };
+
+            container.innerHTML = list.map(circular => `
+        <div class="card" style="border-left: 4px solid ${priorityColors[circular.priority] || '#00D9A5'};">
+          <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: var(--space-4);">
+            <div>
+              <div style="display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-2);">
+                <span style="font-size: 1.5rem;">${typeIcons[circular.type] || '📢'}</span>
+                <h3 style="margin: 0;">${circular.title}</h3>
+                ${circular.priority === 'Urgent' ? '<span class="badge badge-danger">URGENT</span>' : ''}
+                ${circular.priority === 'High' ? '<span class="badge badge-warning">HIGH</span>' : ''}
+              </div>
+              <p style="color: #666; font-size: var(--text-sm);">
+                ${Utils.formatDate(circular.publishedAt)} 
+                ${circular.expiresAt ? `• Expires: ${Utils.formatDate(circular.expiresAt)}` : ''}
+              </p>
+            </div>
+            ${['admin', 'developer'].includes(userRole) ? `
+              <button class="btn btn-sm btn-danger" onclick="deleteCircular('${circular.id}')">🗑️</button>
+            ` : ''}
+          </div>
+          <p style="white-space: pre-line; line-height: 1.6;">${circular.content}</p>
+          <div style="margin-top: var(--space-4); display: flex; gap: var(--space-2);">
+            <span class="badge badge-primary">${circular.type}</span>
+            ${(circular.targetRoles || ['all']).map(r =>
+                `<span class="badge badge-glass">${r === 'all' ? 'Everyone' : r}</span>`
+            ).join('')}
+          </div>
+        </div>
+      `).join('');
+        }
+
+        function openCircularModal() {
+            document.getElementById('circularModal').classList.add('active');
+            document.getElementById('circularForm').reset();
+            document.getElementById('circularId').value = '';
+        }
+
+        function closeCircularModal() {
+            document.getElementById('circularModal').classList.remove('active');
+        }
+
+        async function saveCircular(e) {
+            e.preventDefault();
+
+            const user = Auth.currentUser();
+            const selectedRoles = Array.from(document.querySelectorAll('input[name="targetRoles"]:checked'))
+                .map(cb => cb.value);
+
+            const data = Schema.applyDefaults('circular', {
+                title: document.getElementById('circularTitle').value.trim(),
+                content: document.getElementById('circularContent').value.trim(),
+                type: document.getElementById('circularType').value,
+                priority: document.getElementById('circularPriority').value,
+                targetRoles: selectedRoles.length > 0 ? selectedRoles : ['all'],
+                expiresAt: document.getElementById('circularExpiry').value || null,
+                publishedBy: user?.userId || 'admin'
+            });
+
+            const validation = Schema.validate('circular', data);
+            if (!validation.valid) {
+                Utils.showToast(validation.errors[0], 'error');
+                return;
+            }
+
+            try {
+                await DB.add('circulars', data, user?.userId);
+                Utils.showToast('Circular published successfully', 'success');
+                closeCircularModal();
+                await loadCirculars();
+            } catch (error) {
+                console.error(error);
+                Utils.showToast('Error publishing circular', 'error');
+            }
+        }
+
+        async function deleteCircular(id) {
+            const confirm = await Utils.confirm('Delete this circular?', 'Delete');
+            if (confirm) {
+                await DB.delete('circulars', id);
+                Utils.showToast('Circular deleted', 'success');
+                await loadCirculars();
+            }
+        }
+    </script>
+</body>
+
+</html>

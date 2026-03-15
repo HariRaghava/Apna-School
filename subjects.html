@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subject Management - APNA SCHOOL</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <div class="animated-bg">
+        <div class="floating-shapes">
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+        </div>
+    </div>
+
+    <nav class="navbar">
+        <a href="index.html" class="navbar-brand">🎓 APNA SCHOOL</a>
+        <button class="menu-toggle" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
+        <ul class="navbar-nav">
+            <li><button class="btn btn-glass btn-sm" onclick="Auth.logout()">Logout</button></li>
+        </ul>
+    </nav>
+
+    <aside class="sidebar" id="sidebar">
+        <nav class="sidebar-nav">
+            <a href="admin-dashboard.html" class="sidebar-link"><span class="sidebar-icon">📊</span> Dashboard</a>
+            <a href="students.html" class="sidebar-link"><span class="sidebar-icon">👨‍🎓</span> Students</a>
+            <a href="faculty.html" class="sidebar-link"><span class="sidebar-icon">👨‍🏫</span> Faculty</a>
+            <a href="subjects.html" class="sidebar-link active"><span class="sidebar-icon">📚</span> Subjects</a>
+            <a href="attendance.html" class="sidebar-link"><span class="sidebar-icon">📅</span> Attendance</a>
+            <a href="marks.html" class="sidebar-link"><span class="sidebar-icon">📝</span> Marks</a>
+            <a href="fees.html" class="sidebar-link"><span class="sidebar-icon">💰</span> Fees</a>
+            <a href="circulars.html" class="sidebar-link"><span class="sidebar-icon">📢</span> Circulars</a>
+            <a href="settings.html" class="sidebar-link"><span class="sidebar-icon">⚙️</span> Settings</a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header flex justify-between items-center">
+            <div>
+                <h1 class="page-title">Subject Management</h1>
+                <p class="page-subtitle">Create and assign subjects to classes and faculty.</p>
+            </div>
+            <div class="flex gap-3">
+                <button class="btn btn-accent" onclick="openAssignmentModal()">🔗 Assign to Class</button>
+                <button class="btn btn-primary" onclick="openSubjectModal()">➕ Add Subject</button>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="grid grid-4 mb-6">
+            <div class="stat-card">
+                <div class="stat-icon primary">📚</div>
+                <div class="stat-value" id="totalSubjects">0</div>
+                <div class="stat-label">Total Subjects</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon success">🔗</div>
+                <div class="stat-value" id="totalAssignments">0</div>
+                <div class="stat-label">Class Assignments</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon accent">👨‍🏫</div>
+                <div class="stat-value" id="activeFaculty">0</div>
+                <div class="stat-label">Faculty Teaching</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, var(--color-warning), #FF8C42);">📝
+                </div>
+                <div class="stat-value" id="totalAssessments">0</div>
+                <div class="stat-label">Assessments</div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="card mb-6">
+            <div class="flex gap-3">
+                <button class="btn btn-primary" id="tabSubjects" onclick="switchTab('subjects')">📚 Subjects</button>
+                <button class="btn btn-glass" id="tabAssignments" onclick="switchTab('assignments')">🔗
+                    Assignments</button>
+                <button class="btn btn-glass" id="tabAssessments" onclick="switchTab('assessments')">📝
+                    Assessments</button>
+            </div>
+        </div>
+
+        <!-- Subjects Tab -->
+        <div class="tab-content active" id="contentSubjects">
+            <div class="card mb-4">
+                <input type="text" class="form-control" id="searchSubject" placeholder="🔍 Search subjects..."
+                    style="max-width: 400px;" oninput="filterSubjects()">
+            </div>
+            <div class="grid grid-3 gap-6" id="subjectsGrid">
+                <p class="text-muted">Loading subjects...</p>
+            </div>
+        </div>
+
+        <!-- Assignments Tab -->
+        <div class="tab-content" id="contentAssignments" style="display: none;">
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th>Class</th>
+                            <th>Section</th>
+                            <th>Faculty</th>
+                            <th>Academic Year</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="assignmentsTable">
+                        <tr>
+                            <td colspan="6" class="text-center text-muted">Loading...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Assessments Tab -->
+        <div class="tab-content" id="contentAssessments" style="display: none;">
+            <div class="card mb-4">
+                <div class="flex gap-4 items-center">
+                    <select class="form-control" id="assessmentSubjectFilter" style="max-width: 250px;"
+                        onchange="loadAssessments()">
+                        <option value="">Select Subject</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="openAssessmentModal()">➕ Add Assessment</button>
+                </div>
+            </div>
+            <div class="grid grid-3 gap-6" id="assessmentsGrid">
+                <p class="text-muted">Select a subject to view assessments.</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Subject Modal -->
+    <div class="modal-backdrop" id="subjectModal">
+        <div class="modal" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3 class="modal-title" id="subjectModalTitle">Add Subject</h3>
+                <button class="modal-close" onclick="closeSubjectModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="subjectForm" onsubmit="saveSubject(event)">
+                    <input type="hidden" id="subjectId">
+                    <div class="form-group">
+                        <label class="form-label">Subject Name *</label>
+                        <input type="text" class="form-control" id="subjectName" required
+                            placeholder="e.g., Mathematics">
+                    </div>
+                    <div class="grid grid-2 gap-4">
+                        <div class="form-group">
+                            <label class="form-label">Subject Code *</label>
+                            <input type="text" class="form-control" id="subjectCode" required
+                                placeholder="e.g., MATH101">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Icon</label>
+                            <select class="form-control" id="subjectIcon">
+                                <option value="📐">📐 Mathematics</option>
+                                <option value="🔬">🔬 Science</option>
+                                <option value="📖">📖 Language</option>
+                                <option value="🌍">🌍 Social Studies</option>
+                                <option value="💻">💻 Computer</option>
+                                <option value="🎨">🎨 Art</option>
+                                <option value="🎵">🎵 Music</option>
+                                <option value="⚽">⚽ Sports</option>
+                                <option value="📚" selected>📚 General</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" id="subjectDescription" rows="2"
+                            placeholder="Brief description..."></textarea>
+                    </div>
+                    <div class="grid grid-2 gap-4">
+                        <div class="form-group">
+                            <label class="form-label">Credits</label>
+                            <input type="number" class="form-control" id="subjectCredits" value="1" min="1" max="10">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Type</label>
+                            <select class="form-control" id="subjectElective">
+                                <option value="false">Core Subject</option>
+                                <option value="true">Elective</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="padding: 0; border: none; margin-top: var(--space-4);">
+                        <button type="button" class="btn btn-glass" onclick="closeSubjectModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Subject</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assignment Modal -->
+    <div class="modal-backdrop" id="assignmentModal">
+        <div class="modal" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Assign Subject to Class</h3>
+                <button class="modal-close" onclick="closeAssignmentModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="assignmentForm" onsubmit="saveAssignment(event)">
+                    <input type="hidden" id="assignmentId">
+                    <div class="form-group">
+                        <label class="form-label">Subject *</label>
+                        <select class="form-control" id="assignSubject" required>
+                            <option value="">Select Subject</option>
+                        </select>
+                    </div>
+                    <div class="grid grid-2 gap-4">
+                        <div class="form-group">
+                            <label class="form-label">Class *</label>
+                            <select class="form-control" id="assignClass" required onchange="loadSections()">
+                                <option value="">Select Class</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Section</label>
+                            <select class="form-control" id="assignSection">
+                                <option value="">All Sections</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Faculty *</label>
+                        <select class="form-control" id="assignFaculty" required>
+                            <option value="">Select Faculty</option>
+                        </select>
+                    </div>
+                    <div class="modal-footer" style="padding: 0; border: none; margin-top: var(--space-4);">
+                        <button type="button" class="btn btn-glass" onclick="closeAssignmentModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Assign Subject</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assessment Modal -->
+    <div class="modal-backdrop" id="assessmentModal">
+        <div class="modal" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Add Assessment Type</h3>
+                <button class="modal-close" onclick="closeAssessmentModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="assessmentForm" onsubmit="saveAssessment(event)">
+                    <input type="hidden" id="assessmentId">
+                    <div class="form-group">
+                        <label class="form-label">Subject *</label>
+                        <select class="form-control" id="assessmentSubject" required>
+                            <option value="">Select Subject</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Assessment Name *</label>
+                        <input type="text" class="form-control" id="assessmentName" required
+                            placeholder="e.g., Unit Test 1, Mid-Term">
+                    </div>
+                    <div class="grid grid-2 gap-4">
+                        <div class="form-group">
+                            <label class="form-label">Max Marks *</label>
+                            <input type="number" class="form-control" id="assessmentMaxMarks" required value="100"
+                                min="1">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Weightage (%)</label>
+                            <input type="number" class="form-control" id="assessmentWeightage" value="100" min="0"
+                                max="100">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Exam Date</label>
+                        <input type="date" class="form-control" id="assessmentDate">
+                    </div>
+                    <div class="modal-footer" style="padding: 0; border: none; margin-top: var(--space-4);">
+                        <button type="button" class="btn btn-glass" onclick="closeAssessmentModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Assessment</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/db.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/schema.js"></script>
+    <script src="js/subjects.js"></script>
+</body>
+
+</html>

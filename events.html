@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Events & Circulars - APNA SCHOOL</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <div class="animated-bg">
+        <div class="floating-shapes">
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+        </div>
+    </div>
+
+    <nav class="navbar">
+        <a href="index.html" class="navbar-brand">🎓 APNA SCHOOL</a>
+        <button class="menu-toggle" onclick="document.getElementById('mainNav').classList.toggle('active')">
+            <span></span><span></span><span></span>
+        </button>
+        <ul class="navbar-nav" id="mainNav">
+            <li><a href="index.html" class="nav-link">Home</a></li>
+            <li><a href="about.html" class="nav-link">About</a></li>
+            <li><a href="facilities.html" class="nav-link">Facilities</a></li>
+            <li><a href="clubs.html" class="nav-link">Clubs</a></li>
+            <li><a href="events.html" class="nav-link active">Events</a></li>
+            <li><a href="contact.html" class="nav-link">Contact</a></li>
+            <li><a href="login.html" class="btn btn-accent btn-sm">Login</a></li>
+        </ul>
+    </nav>
+
+    <main class="main-content no-sidebar" style="margin-top: 100px;">
+        <div class="container">
+            <div class="text-center mb-8">
+                <h1 style="font-size: var(--text-5xl); color: white; margin-bottom: var(--space-4);">Events & <span
+                        class="text-gradient">Circulars</span></h1>
+                <p style="color: rgba(255,255,255,0.8); font-size: var(--text-xl);">Stay updated with school events,
+                    announcements, and important notices.</p>
+            </div>
+
+            <div class="grid grid-2 gap-8">
+                <!-- Upcoming Events -->
+                <div>
+                    <h2 style="color: white; margin-bottom: var(--space-6);">📅 Upcoming Events</h2>
+
+                    <div class="card mb-4" style="border-left: 4px solid var(--color-royal-indigo);">
+                        <div style="display: flex; gap: var(--space-4);">
+                            <div
+                                style="background: linear-gradient(135deg, var(--color-royal-indigo), var(--color-aqua-glow)); color: white; padding: var(--space-3); border-radius: var(--radius-md); text-align: center; min-width: 60px;">
+                                <div style="font-size: var(--text-2xl); font-weight: bold;">15</div>
+                                <div style="font-size: var(--text-xs);">JAN</div>
+                            </div>
+                            <div>
+                                <h4 style="color: var(--color-royal-indigo);">Annual Sports Meet 2025</h4>
+                                <p style="color: #666; font-size: var(--text-sm); margin-top: var(--space-1);">Track and
+                                    field events, team sports, and prize distribution. All students participate!</p>
+                                <span class="badge badge-primary mt-2">Sports</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mb-4" style="border-left: 4px solid var(--color-success);">
+                        <div style="display: flex; gap: var(--space-4);">
+                            <div
+                                style="background: linear-gradient(135deg, var(--color-success), #00B88A); color: white; padding: var(--space-3); border-radius: var(--radius-md); text-align: center; min-width: 60px;">
+                                <div style="font-size: var(--text-2xl); font-weight: bold;">22</div>
+                                <div style="font-size: var(--text-xs);">JAN</div>
+                            </div>
+                            <div>
+                                <h4 style="color: var(--color-success);">Science Exhibition</h4>
+                                <p style="color: #666; font-size: var(--text-sm); margin-top: var(--space-1);">Student
+                                    projects showcase, science models, and working demonstrations. Open to parents.</p>
+                                <span class="badge badge-success mt-2">Academic</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mb-4" style="border-left: 4px solid var(--color-soft-purple);">
+                        <div style="display: flex; gap: var(--space-4);">
+                            <div
+                                style="background: linear-gradient(135deg, var(--color-soft-purple), #B88AFF); color: white; padding: var(--space-3); border-radius: var(--radius-md); text-align: center; min-width: 60px;">
+                                <div style="font-size: var(--text-2xl); font-weight: bold;">28</div>
+                                <div style="font-size: var(--text-xs);">JAN</div>
+                            </div>
+                            <div>
+                                <h4 style="color: var(--color-soft-purple);">Republic Day Celebration</h4>
+                                <p style="color: #666; font-size: var(--text-sm); margin-top: var(--space-1);">Flag
+                                    hoisting, cultural programs, and patriotic performances by students.</p>
+                                <span class="badge badge-info mt-2">National</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mb-4" style="border-left: 4px solid var(--color-warning);">
+                        <div style="display: flex; gap: var(--space-4);">
+                            <div
+                                style="background: linear-gradient(135deg, var(--color-warning), #FF8C42); color: white; padding: var(--space-3); border-radius: var(--radius-md); text-align: center; min-width: 60px;">
+                                <div style="font-size: var(--text-2xl); font-weight: bold;">10</div>
+                                <div style="font-size: var(--text-xs);">FEB</div>
+                            </div>
+                            <div>
+                                <h4 style="color: var(--color-warning);">Parent-Teacher Meeting</h4>
+                                <p style="color: #666; font-size: var(--text-sm); margin-top: var(--space-1);">Discuss
+                                    student progress with teachers. Mandatory for all parents.</p>
+                                <span class="badge badge-warning mt-2">Meeting</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Circulars -->
+                <div>
+                    <h2 style="color: white; margin-bottom: var(--space-6);">📢 Recent Circulars</h2>
+
+                    <div class="card mb-4">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: start; margin-bottom: var(--space-3);">
+                            <h4 style="color: var(--color-danger);">🔴 Half-Yearly Exam Schedule</h4>
+                            <span style="font-size: var(--text-xs); color: #999;">Dec 10, 2024</span>
+                        </div>
+                        <p style="color: #666; font-size: var(--text-sm);">Half-yearly examinations will commence from
+                            January 5, 2025. Detailed timetable attached. Students are advised to prepare accordingly.
+                        </p>
+                        <button class="btn btn-sm btn-glass mt-3">📄 Download PDF</button>
+                    </div>
+
+                    <div class="card mb-4">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: start; margin-bottom: var(--space-3);">
+                            <h4 style="color: var(--color-info);">🔵 Winter Break Notice</h4>
+                            <span style="font-size: var(--text-xs); color: #999;">Dec 5, 2024</span>
+                        </div>
+                        <p style="color: #666; font-size: var(--text-sm);">Winter vacation from December 20, 2024 to
+                            January 2, 2025. School reopens on January 3, 2025.</p>
+                        <button class="btn btn-sm btn-glass mt-3">📄 Download PDF</button>
+                    </div>
+
+                    <div class="card mb-4">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: start; margin-bottom: var(--space-3);">
+                            <h4 style="color: var(--color-success);">🟢 Updated Fee Structure</h4>
+                            <span style="font-size: var(--text-xs); color: #999;">Nov 25, 2024</span>
+                        </div>
+                        <p style="color: #666; font-size: var(--text-sm);">Fee structure for academic year 2025-26 has
+                            been revised. Please check the attached document for details.</p>
+                        <button class="btn btn-sm btn-glass mt-3">📄 Download PDF</button>
+                    </div>
+
+                    <div class="card mb-4">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: start; margin-bottom: var(--space-3);">
+                            <h4 style="color: var(--color-soft-purple);">🟣 Admission Open 2025-26</h4>
+                            <span style="font-size: var(--text-xs); color: #999;">Nov 15, 2024</span>
+                        </div>
+                        <p style="color: #666; font-size: var(--text-sm);">Admissions are now open for the academic year
+                            2025-26 for classes Nursery to Class X. Limited seats available.</p>
+                        <button class="btn btn-sm btn-glass mt-3">📄 Download Form</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Calendar View -->
+            <div class="card mt-8">
+                <h3 class="text-gradient mb-4">📆 Event Calendar - January 2025</h3>
+                <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center;">
+                    <div
+                        style="background: var(--color-royal-indigo); color: white; padding: var(--space-2); font-weight: bold;">
+                        Sun</div>
+                    <div
+                        style="background: var(--color-royal-indigo); color: white; padding: var(--space-2); font-weight: bold;">
+                        Mon</div>
+                    <div
+                        style="background: var(--color-royal-indigo); color: white; padding: var(--space-2); font-weight: bold;">
+                        Tue</div>
+                    <div
+                        style="background: var(--color-royal-indigo); color: white; padding: var(--space-2); font-weight: bold;">
+                        Wed</div>
+                    <div
+                        style="background: var(--color-royal-indigo); color: white; padding: var(--space-2); font-weight: bold;">
+                        Thu</div>
+                    <div
+                        style="background: var(--color-royal-indigo); color: white; padding: var(--space-2); font-weight: bold;">
+                        Fri</div>
+                    <div
+                        style="background: var(--color-royal-indigo); color: white; padding: var(--space-2); font-weight: bold;">
+                        Sat</div>
+                    <div style="padding: var(--space-3); background: #f5f5f5;"></div>
+                    <div style="padding: var(--space-3); background: #f5f5f5;"></div>
+                    <div style="padding: var(--space-3); background: #f5f5f5;"></div>
+                    <div style="padding: var(--space-3); background: white;">1</div>
+                    <div style="padding: var(--space-3); background: white;">2</div>
+                    <div style="padding: var(--space-3); background: white;">3</div>
+                    <div style="padding: var(--space-3); background: white;">4</div>
+                    <div style="padding: var(--space-3); background: white;">5</div>
+                    <div style="padding: var(--space-3); background: white;">6</div>
+                    <div style="padding: var(--space-3); background: white;">7</div>
+                    <div style="padding: var(--space-3); background: white;">8</div>
+                    <div style="padding: var(--space-3); background: white;">9</div>
+                    <div style="padding: var(--space-3); background: white;">10</div>
+                    <div style="padding: var(--space-3); background: white;">11</div>
+                    <div style="padding: var(--space-3); background: white;">12</div>
+                    <div style="padding: var(--space-3); background: white;">13</div>
+                    <div style="padding: var(--space-3); background: white;">14</div>
+                    <div
+                        style="padding: var(--space-3); background: var(--color-royal-indigo); color: white; border-radius: var(--radius-sm);">
+                        15 🏆</div>
+                    <div style="padding: var(--space-3); background: white;">16</div>
+                    <div style="padding: var(--space-3); background: white;">17</div>
+                    <div style="padding: var(--space-3); background: white;">18</div>
+                    <div style="padding: var(--space-3); background: white;">19</div>
+                    <div style="padding: var(--space-3); background: white;">20</div>
+                    <div style="padding: var(--space-3); background: white;">21</div>
+                    <div
+                        style="padding: var(--space-3); background: var(--color-success); color: white; border-radius: var(--radius-sm);">
+                        22 🔬</div>
+                    <div style="padding: var(--space-3); background: white;">23</div>
+                    <div style="padding: var(--space-3); background: white;">24</div>
+                    <div style="padding: var(--space-3); background: white;">25</div>
+                    <div
+                        style="padding: var(--space-3); background: var(--color-danger); color: white; border-radius: var(--radius-sm);">
+                        26 🎌</div>
+                    <div style="padding: var(--space-3); background: white;">27</div>
+                    <div
+                        style="padding: var(--space-3); background: var(--color-soft-purple); color: white; border-radius: var(--radius-sm);">
+                        28 🎭</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer
+        style="background: rgba(10, 15, 44, 0.95); padding: var(--space-8); text-align: center; color: rgba(255,255,255,0.7); margin-top: var(--space-12);">
+        <p>© 2025 APNA SCHOOL. All Rights Reserved.</p>
+    </footer>
+</body>
+
+</html>

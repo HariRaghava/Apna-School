@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - APNA SCHOOL</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <div class="animated-bg">
+        <div class="floating-shapes">
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+        </div>
+    </div>
+
+    <nav class="navbar">
+        <a href="index.html" class="navbar-brand">🎓 APNA SCHOOL</a>
+        <button class="menu-toggle" onclick="document.getElementById('mainNav').classList.toggle('active')">
+            <span></span><span></span><span></span>
+        </button>
+        <ul class="navbar-nav" id="mainNav">
+            <li><a href="index.html" class="nav-link">Home</a></li>
+            <li><a href="about.html" class="nav-link">About</a></li>
+            <li><a href="facilities.html" class="nav-link">Facilities</a></li>
+            <li><a href="clubs.html" class="nav-link">Clubs</a></li>
+            <li><a href="events.html" class="nav-link">Events</a></li>
+            <li><a href="contact.html" class="nav-link active">Contact</a></li>
+            <li><a href="login.html" class="btn btn-accent btn-sm">Login</a></li>
+        </ul>
+    </nav>
+
+    <main class="main-content no-sidebar" style="margin-top: 100px;">
+        <div class="container">
+            <div class="text-center mb-8">
+                <h1 style="font-size: var(--text-5xl); color: white; margin-bottom: var(--space-4);">Contact <span
+                        class="text-gradient">Us</span></h1>
+                <p style="color: rgba(255,255,255,0.8); font-size: var(--text-xl);">We'd love to hear from you. Get in
+                    touch with us!</p>
+            </div>
+
+            <div class="grid grid-2 gap-8">
+                <!-- Contact Form -->
+                <div class="card">
+                    <h3 class="text-gradient" style="font-size: var(--text-2xl); margin-bottom: var(--space-6);">📧 Send
+                        us a Message</h3>
+                    <form id="contactForm" onsubmit="submitForm(event)">
+                        <div class="form-group">
+                            <label class="form-label">Your Name *</label>
+                            <input type="text" class="form-control" id="name" required placeholder="Enter your name">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Email Address *</label>
+                            <input type="email" class="form-control" id="email" required placeholder="Enter your email">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Subject *</label>
+                            <select class="form-control" id="subject" required>
+                                <option value="">Select a subject</option>
+                                <option value="admission">Admission Inquiry</option>
+                                <option value="fees">Fee Related</option>
+                                <option value="academics">Academic Query</option>
+                                <option value="feedback">Feedback</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Message *</label>
+                            <textarea class="form-control" id="message" rows="5" required
+                                placeholder="Type your message here..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">📤 Send Message</button>
+                    </form>
+                </div>
+
+                <!-- Contact Info -->
+                <div>
+                    <div class="card mb-6">
+                        <h3 class="text-gradient" style="font-size: var(--text-2xl); margin-bottom: var(--space-6);">📍
+                            Contact Information</h3>
+                        <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+                            <div style="display: flex; gap: var(--space-4); align-items: flex-start;">
+                                <div
+                                    style="width: 50px; height: 50px; background: linear-gradient(135deg, var(--color-royal-indigo), var(--color-aqua-glow)); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+                                    📍</div>
+                                <div>
+                                    <h4>Address</h4>
+                                    <p style="color: #666;">APNA SCHOOL Campus<br>Tumkur, Karnataka 572103<br>India</p>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: var(--space-4); align-items: flex-start;">
+                                <div
+                                    style="width: 50px; height: 50px; background: linear-gradient(135deg, var(--color-success), #00B88A); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+                                    📞</div>
+                                <div>
+                                    <h4>Phone</h4>
+                                    <p style="color: #666;">+91 1234567890<br>+91 9876543210 (Admissions)</p>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: var(--space-4); align-items: flex-start;">
+                                <div
+                                    style="width: 50px; height: 50px; background: linear-gradient(135deg, var(--color-soft-purple), #B88AFF); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+                                    ✉️</div>
+                                <div>
+                                    <h4>Email</h4>
+                                    <p style="color: #666;">info@apnaschool.edu.in<br>admissions@apnaschool.edu.in</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="text-gradient" style="font-size: var(--text-2xl); margin-bottom: var(--space-4);">🕐
+                            Office Hours</h3>
+                        <div style="color: #666;">
+                            <div
+                                style="display: flex; justify-content: space-between; padding: var(--space-2) 0; border-bottom: 1px solid rgba(0,0,0,0.08);">
+                                <span>Monday - Friday</span>
+                                <strong>8:00 AM - 4:00 PM</strong>
+                            </div>
+                            <div
+                                style="display: flex; justify-content: space-between; padding: var(--space-2) 0; border-bottom: 1px solid rgba(0,0,0,0.08);">
+                                <span>Saturday</span>
+                                <strong>8:00 AM - 1:00 PM</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: var(--space-2) 0;">
+                                <span>Sunday</span>
+                                <strong>Closed</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Map Placeholder -->
+            <!-- Interactive Map -->
+            <div class="card mt-8 p-0 overflow-hidden"
+                style="position: relative; height: 400px; border:1px solid rgba(255,255,255,0.2);">
+                <iframe
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15555.224853034235!2d77.1009819662369!3d13.344445353846666!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bb02c3b632e23b9%3A0xe15fb239e9d737bb!2sTumakuru%2C%20Karnataka!5e0!3m2!1sen!2sin!4v1709214012014!5m2!1sen!2sin"
+                    width="100%" height="100%" style="border:0; filter: contrast(1.1) saturate(1.1);" allowfullscreen=""
+                    loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+                </iframe>
+
+                <!-- Glass Overlay Badge -->
+                <div
+                    style="position: absolute; bottom: 20px; left: 20px; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); padding: 15px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); max-width: 250px;">
+                    <h4 style="color: var(--color-primary); margin-bottom: 4px; font-weight: bold;">🎓 APNA SCHOOL</h4>
+                    <p style="font-size: 12px; color: #666; margin-bottom: 8px;">Tumkur, Karnataka Campus</p>
+                    <a href="https://maps.google.com/maps?q=Tumkur,+Karnataka" target="_blank"
+                        class="btn btn-sm btn-primary"
+                        style="width: 100%; text-decoration: none; display: block; text-align: center;">Get Directions
+                        ↗</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer
+        style="background: rgba(10, 15, 44, 0.95); padding: var(--space-8); text-align: center; color: rgba(255,255,255,0.7); margin-top: var(--space-12);">
+        <p>© 2025 APNA SCHOOL. All Rights Reserved.</p>
+    </footer>
+
+    <script src="js/utils.js"></script>
+    <script>
+        function submitForm(e) {
+            e.preventDefault();
+            Utils.showToast('Message sent successfully! We will get back to you soon.', 'success');
+            document.getElementById('contactForm').reset();
+        }
+    </script>
+</body>
+
+</html>

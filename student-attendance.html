@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Attendance - APNA SCHOOL</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.5);
+            position: relative;
+        }
+
+        .calendar-day.present {
+            background: rgba(0, 217, 165, 0.2);
+            color: var(--color-success);
+            font-weight: bold;
+            border: 1px solid rgba(0, 217, 165, 0.3);
+        }
+
+        .calendar-day.absent {
+            background: rgba(255, 90, 90, 0.2);
+            color: var(--color-danger);
+            font-weight: bold;
+            border: 1px solid rgba(255, 90, 90, 0.3);
+        }
+
+        .calendar-day.header {
+            background: transparent;
+            font-weight: bold;
+            color: #666;
+            height: 30px;
+            aspect-ratio: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="animated-bg">
+        <div class="floating-shapes">
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+        </div>
+    </div>
+
+    <nav class="navbar">
+        <a href="index.html" class="navbar-brand">🎓 APNA SCHOOL</a>
+        <button class="menu-toggle" onclick="toggleSidebar()">
+            <span></span><span></span><span></span>
+        </button>
+        <ul class="navbar-nav">
+            <li><span class="nav-link" id="userName">Student</span></li>
+            <li><button class="btn btn-glass btn-sm" onclick="Auth.logout()">Logout</button></li>
+        </ul>
+    </nav>
+
+    <aside class="sidebar" id="sidebar">
+        <nav class="sidebar-nav" id="sidebarLinks">
+            <!-- Populated by JS -->
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">My Attendance</h1>
+            <p class="page-subtitle">Track your daily attendance record.</p>
+        </div>
+
+        <div class="grid grid-3 mb-8">
+            <div class="stat-card">
+                <div class="stat-icon primary">✅</div>
+                <div class="stat-value" id="presentCount">0</div>
+                <div class="stat-label">Days Present</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon danger">❌</div>
+                <div class="stat-value" id="absentCount">0</div>
+                <div class="stat-label">Days Absent</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon accent">📊</div>
+                <div class="stat-value" id="attendPercent">0%</div>
+                <div class="stat-label">Overall Attendance</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header flex justify-between items-center">
+                <h3 class="card-title">Attendance Calendar</h3>
+                <div class="flex gap-2">
+                    <button class="btn btn-sm btn-glass" onclick="changeMonth(-1)">Previous</button>
+                    <span id="currentMonthYear"
+                        style="font-weight: bold; min-width: 120px; text-align: center; display:flex; align-items:center; justify-content:center;">Month
+                        Year</span>
+                    <button class="btn btn-sm btn-glass" onclick="changeMonth(1)">Next</button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="calendar-grid" id="calendar">
+                    <!-- JS will populate this -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/db.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/utils.js"></script>
+    <script>
+        let currentDate = new Date();
+        let attendanceData = [];
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!Auth.requireRole(['student', 'parent'])) return;
+
+            const user = Auth.currentUser();
+            document.getElementById('userName').textContent = user.name;
+            setupSidebar(user.role);
+
+            await Utils.guard(async () => {
+                // If ID passed in URL (e.g. from Parent dash), use it. Else use linkedId.
+                const params = new URLSearchParams(window.location.search);
+                const studentId = params.get('id') || user.linkedId;
+
+                await loadAttendance(studentId);
+            });
+        });
+
+        function setupSidebar(role) {
+            const sidebar = document.getElementById('sidebarLinks');
+            if (role === 'student') {
+                sidebar.innerHTML = `
+                    <a href="student-dashboard.html" class="sidebar-link"><span class="sidebar-icon">📊</span> Dashboard</a>
+                    <a href="student-attendance.html" class="sidebar-link active"><span class="sidebar-icon">📅</span> My Attendance</a>
+                    <a href="student-marks.html" class="sidebar-link"><span class="sidebar-icon">📝</span> Results & Marks</a>
+                    <a href="student-timetable.html" class="sidebar-link"><span class="sidebar-icon">📆</span> Class Timetable</a>
+                    <a href="student-fees.html" class="sidebar-link"><span class="sidebar-icon">💰</span> Fee Status</a>
+                    <a href="student-messages.html" class="sidebar-link"><span class="sidebar-icon">💬</span> Messages</a>
+                `;
+            } else if (role === 'parent') {
+                sidebar.innerHTML = `
+                    <a href="parent-dashboard.html" class="sidebar-link"><span class="sidebar-icon">👨‍👩‍👧‍👦</span> Dashboard</a>
+                    <a href="student-fees.html" class="sidebar-link"><span class="sidebar-icon">💰</span> Fee Payment</a>
+                    <a href="student-attendance.html" class="sidebar-link active"><span class="sidebar-icon">📅</span> Attendance</a>
+                    <a href="student-marks.html" class="sidebar-link"><span class="sidebar-icon">📝</span> Report Cards</a>
+                    <a href="student-messages.html" class="sidebar-link"><span class="sidebar-icon">💬</span> Messages</a>
+                `;
+            }
+        }
+
+        async function loadAttendance(studentId) {
+            await DB.ready();
+            const allAttendance = await DB.getAll('attendance');
+            attendanceData = allAttendance.filter(a => a.studentId === studentId);
+
+            updateStats();
+            renderCalendar();
+        }
+
+        function updateStats() {
+            const total = attendanceData.length;
+            const present = attendanceData.filter(a => a.status === 'present').length;
+            const absent = total - present; // Assuming purely binary for now
+            const percent = total > 0 ? Math.round((present / total) * 100) : 0;
+
+            document.getElementById('presentCount').textContent = present;
+            document.getElementById('absentCount').textContent = absent;
+            document.getElementById('attendPercent').textContent = percent + '%';
+
+            if (percent < 75) document.getElementById('attendPercent').style.color = 'var(--color-danger)';
+            else document.getElementById('attendPercent').style.color = 'var(--color-success)';
+        }
+
+        function changeMonth(delta) {
+            currentDate.setMonth(currentDate.getMonth() + delta);
+            renderCalendar();
+        }
+
+        function renderCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+
+            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            document.getElementById('currentMonthYear').textContent = `${monthNames[month]} ${year}`;
+
+            const container = document.getElementById('calendar');
+            container.innerHTML = '';
+
+            // Headers
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            days.forEach(d => {
+                container.innerHTML += `<div class="calendar-day header">${d}</div>`;
+            });
+
+            // Days
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            // Empty slots
+            for (let i = 0; i < firstDay; i++) {
+                container.innerHTML += `<div class="calendar-day" style="background:transparent;"></div>`;
+            }
+
+            // Dates
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+                // Check status
+                // Find record EXACTLY matching this date
+                // Note: db stores ISO strings usually or consistent format. seed.js uses YYYY-MM-DD for attendance (let's verify, usually ISO)
+                // Actually seed.js uses: new Date().toISOString().split('T')[0] -> YYYY-MM-DD
+                const record = attendanceData.find(a => a.date.startsWith(dateStr));
+
+                let className = 'calendar-day';
+                let content = day;
+
+                if (record) {
+                    if (record.status === 'present') className += ' present';
+                    if (record.status === 'absent') className += ' absent';
+                }
+
+                container.innerHTML += `<div class="${className}">${content}</div>`;
+            }
+        }
+    </script>
+</body>
+
+</html>

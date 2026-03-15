@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - APNA SCHOOL</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <div class="animated-bg">
+        <div class="floating-shapes">
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+        </div>
+    </div>
+
+    <nav class="navbar">
+        <a href="index.html" class="navbar-brand">🎓 APNA SCHOOL</a>
+        <button class="menu-toggle" onclick="toggleSidebar()">
+            <span></span><span></span><span></span>
+        </button>
+        <ul class="navbar-nav">
+            <li><span class="nav-link" id="userName">Student</span></li>
+            <li><button class="btn btn-glass btn-sm" onclick="Auth.logout()">Logout</button></li>
+        </ul>
+    </nav>
+
+    <aside class="sidebar" id="sidebar">
+        <nav class="sidebar-nav">
+            <a href="student-dashboard.html" class="sidebar-link active"><span class="sidebar-icon">📊</span>
+                Dashboard</a>
+            <a href="student-attendance.html" class="sidebar-link"><span class="sidebar-icon">📅</span> My
+                Attendance</a>
+            <a href="student-marks.html" class="sidebar-link"><span class="sidebar-icon">📝</span> Results & Marks</a>
+            <a href="student-timetable.html" class="sidebar-link"><span class="sidebar-icon">📆</span> Class
+                Timetable</a>
+            <a href="student-fees.html" class="sidebar-link"><span class="sidebar-icon">💰</span> Fee Status</a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">My Dashboard</h1>
+            <p class="page-subtitle">Good morning! Here's your academic summary.</p>
+        </div>
+
+        <!-- Student Stats Grid -->
+        <div class="grid grid-4 mb-8">
+            <div class="stat-card">
+                <div class="stat-icon primary">📅</div>
+                <div class="stat-value" id="attendanceStat">0%</div>
+                <div class="stat-label">Attendance</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon accent">🏆</div>
+                <div class="stat-value" id="gradeStat">-</div>
+                <div class="stat-label">Avg Grade</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon purple">📚</div>
+                <div class="stat-value" id="assignmentsStat">0</div>
+                <div class="stat-label">Assignments</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon warning">💰</div>
+                <div class="stat-value" id="feeStat">Unpaid</div>
+                <div class="stat-label">Fee Status</div>
+            </div>
+        </div>
+
+        <div class="grid grid-2">
+            <!-- Notices -->
+            <div class="card">
+                <div class="card-header flex justify-between items-center">
+                    <h3 class="card-title">📢 Notice Board</h3>
+                    <span class="badge badge-primary">New</span>
+                </div>
+                <div id="noticeBoard" class="activity-list">
+                    <!-- Loaded via JS -->
+                    <div class="p-4 text-center text-muted">Loading circulars...</div>
+                </div>
+            </div>
+
+            <!-- Today's Classes -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">📆 Today's Classes</h3>
+                </div>
+                <div class="table-container shadow-none">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Period</th>
+                                <th>Subject</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+                        <tbody id="todayTimetable">
+                            <!-- Loaded via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upcoming Events / Exams -->
+        <div class="card mt-8">
+            <div class="card-header">
+                <h3 class="card-title">📝 Upcoming Exams & Events</h3>
+            </div>
+            <div class="grid grid-3 gap-4" id="eventsContainer">
+                <!-- Loaded via JS -->
+            </div>
+        </div>
+    </main>
+
+    <script src="js/db.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/utils.js"></script>
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!Auth.requireRole('student')) return;
+
+            const user = Auth.currentUser();
+            document.getElementById('userName').textContent = user.name;
+
+            await loadStudentData(user.linkedId);
+        });
+
+        async function loadStudentData(studentId) {
+            await DB.ready();
+
+            // Fetch core data
+            const student = await DB.get('students', studentId);
+            const attendance = await DB.getAll('attendance');
+            const marks = await DB.getAll('marks');
+            const fees = await DB.getAll('fees');
+            const timetableData = await DB.getAll('timetable');
+            const subjects = await DB.getAll('subjects'); // Need subjects to resolve names
+
+            if (!student) return;
+
+            // 1. Attendance Stat
+            const myAttendance = attendance.filter(a => a.studentId === studentId);
+            const totalDays = myAttendance.length || 1;
+            const presentDays = myAttendance.filter(a => a.status === 'present').length;
+            const attendPercent = Math.round((presentDays / totalDays) * 100);
+
+            document.getElementById('attendanceStat').textContent = attendPercent + '%';
+            if (attendPercent < 75) document.getElementById('attendanceStat').style.color = 'var(--color-danger)';
+
+            // 2. Fee Stat (Show Balance)
+            const myFees = fees.filter(f => f.studentId === studentId);
+            let totalBalance = 0;
+            myFees.forEach(f => totalBalance += f.balance);
+
+            const feeEl = document.getElementById('feeStat');
+            if (totalBalance > 0) {
+                feeEl.textContent = '₹ ' + totalBalance.toLocaleString();
+                feeEl.style.color = 'var(--color-danger)';
+            } else {
+                feeEl.textContent = 'Clear';
+                feeEl.style.color = 'var(--color-success)';
+            }
+
+            // 3. Grades (Avg)
+            const myMarks = marks.filter(m => m.studentId === studentId);
+            if (myMarks.length > 0) {
+                const avg = myMarks.reduce((sum, m) => sum + (m.marksObtained / m.maxMarks), 0) / myMarks.length;
+                const percent = Math.round(avg * 100);
+                document.getElementById('gradeStat').textContent = percent + '%';
+            }
+
+            // 4. Assignments/Subjects
+            const assignments = await DB.getAll('subjectAssignments');
+            const myClassAssign = assignments.filter(a => a.classId === student.classId);
+            document.getElementById('assignmentsStat').textContent = myClassAssign.length;
+
+            // 5. Notices (Circulars)
+            const circulars = await DB.getAll('circulars');
+            const noticeContainer = document.getElementById('noticeBoard');
+            const validNotices = circulars
+                .filter(c => c.targetRoles.includes('student') || c.targetRoles.includes('all'))
+                .sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt))
+                .slice(0, 3);
+
+            if (validNotices.length > 0) {
+                noticeContainer.innerHTML = validNotices.map(n => `
+                    <div style="padding: 12px; border-bottom: 1px solid rgba(0,0,0,0.05);">
+                        <div style="font-weight: 600; color: var(--color-midnight);">${n.title}</div>
+                        <div style="font-size: 13px; color: #666; margin-top: 4px;">${n.content.substring(0, 50)}...</div>
+                        <div style="font-size: 11px; color: #999; margin-top: 4px;">${new Date(n.publishedAt).toLocaleDateString()}</div>
+                    </div>
+                `).join('');
+            } else {
+                noticeContainer.innerHTML = '<div class="p-4 text-center text-muted">No notices at the moment.</div>';
+            }
+
+            // 6. Timetable (Dynamic)
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            const todayName = days[new Date().getDay()];
+            const todayTable = document.getElementById('todayTimetable');
+
+            // Find schedule for my class/section and Today
+            const mySchedule = timetableData.find(t =>
+                t.classId === student.classId &&
+                t.sectionId === student.sectionId &&
+                t.day === todayName
+            );
+
+            if (mySchedule && mySchedule.periods && mySchedule.periods.length > 0) {
+                todayTable.innerHTML = mySchedule.periods.map(p => {
+                    const subject = subjects.find(s => s.id === p.subjectId);
+                    const subjectName = subject ? subject.name : 'Unknown Subject';
+                    const icon = subject ? subject.icon : '📚';
+
+                    return `
+                        <tr>
+                            <td><span class="badge badge-primary">P${p.period}</span></td>
+                            <td>
+                                <div class="flex items-center gap-2">
+                                    <span>${icon}</span>
+                                    <span>${subjectName}</span>
+                                </div>
+                            </td>
+                            <td>${p.time}</td>
+                        </tr>
+                    `;
+                }).join('');
+            } else {
+                todayTable.innerHTML = `
+                    <tr><td colspan="3" class="text-center text-muted">No classes scheduled for today (${todayName})</td></tr>
+                `;
+            }
+
+            // 7. Upcoming Exams (Assessment Types)
+            const assessments = await DB.getAll('assessmentTypes');
+            const upcoming = assessments.slice(0, 3);
+            document.getElementById('eventsContainer').innerHTML = upcoming.map(a => `
+                <div class="card p-4" style="background: rgba(90, 63, 255, 0.03); border: 1px solid rgba(90, 63, 255, 0.1);">
+                    <div style="color: var(--color-primary); font-weight: bold; margin-bottom: 4px;">${a.name}</div>
+                    <div style="font-size: 13px; color: #666;">Max Marks: ${a.maxMarks}</div>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+
+</html>

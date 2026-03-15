@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Class Timetable - APNA SCHOOL</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .tt-grid {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .tt-grid th,
+        .tt-grid td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #eee;
+        }
+
+        .tt-grid th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+
+        .tt-grid .day-col {
+            background: #f8f9fa;
+            font-weight: bold;
+            color: #444;
+            text-align: left;
+            width: 100px;
+        }
+
+        .tt-subject {
+            font-weight: bold;
+            color: var(--color-primary);
+        }
+
+        .tt-time {
+            font-size: 11px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .tt-break {
+            background: #f3f4f6;
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            font-weight: bold;
+            color: #999;
+            letter-spacing: 2px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="animated-bg">
+        <div class="floating-shapes">
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+        </div>
+    </div>
+
+    <nav class="navbar">
+        <a href="index.html" class="navbar-brand">🎓 APNA SCHOOL</a>
+        <button class="menu-toggle" onclick="toggleSidebar()">
+            <span></span><span></span><span></span>
+        </button>
+        <ul class="navbar-nav">
+            <li><span class="nav-link" id="userName">Student</span></li>
+            <li><button class="btn btn-glass btn-sm" onclick="Auth.logout()">Logout</button></li>
+        </ul>
+    </nav>
+
+    <aside class="sidebar" id="sidebar">
+        <nav class="sidebar-nav" id="sidebarLinks">
+            <!-- Populated by JS -->
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Class Timetable</h1>
+            <p class="page-subtitle" id="classInfo">Loading schedule...</p>
+        </div>
+
+        <div class="card mb-6">
+            <div class="card-body">
+                <div class="table-container">
+                    <table class="tt-grid">
+                        <thead>
+                            <tr>
+                                <th>Day</th>
+                                <th>P1 <br> 09:00-09:45</th>
+                                <th>P2 <br> 09:45-10:30</th>
+                                <th>Break <br> 10:30-10:45</th>
+                                <th>P3 <br> 10:45-11:30</th>
+                                <th>P4 <br> 11:30-12:15</th>
+                                <th>Lunch <br> 12:15-01:00</th>
+                                <th>P5 <br> 01:00-01:45</th>
+                                <th>P6 <br> 01:45-02:30</th>
+                            </tr>
+                        </thead>
+                        <tbody id="timetableBody">
+                            <!-- Loaded via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Subject Details</h3>
+            </div>
+            <div class="card-body" id="subjectLegend">
+                <!-- Legend loaded here -->
+            </div>
+        </div>
+    </main>
+
+    <script src="js/db.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/utils.js"></script>
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!Auth.requireRole(['student', 'parent'])) return;
+
+            const user = Auth.currentUser();
+            document.getElementById('userName').textContent = user.name;
+            setupSidebar(user.role);
+
+            await Utils.guard(async () => {
+                const params = new URLSearchParams(window.location.search);
+                const studentId = params.get('id') || user.linkedId;
+                await loadTimetable(studentId);
+            });
+        });
+
+        function setupSidebar(role) {
+            const sidebar = document.getElementById('sidebarLinks');
+            if (role === 'student') {
+                sidebar.innerHTML = `
+                    <a href="student-dashboard.html" class="sidebar-link"><span class="sidebar-icon">📊</span> Dashboard</a>
+                    <a href="student-attendance.html" class="sidebar-link"><span class="sidebar-icon">📅</span> My Attendance</a>
+                    <a href="student-marks.html" class="sidebar-link"><span class="sidebar-icon">📝</span> Results & Marks</a>
+                    <a href="student-timetable.html" class="sidebar-link active"><span class="sidebar-icon">📆</span> Class Timetable</a>
+                    <a href="student-fees.html" class="sidebar-link"><span class="sidebar-icon">💰</span> Fee Status</a>
+                    <a href="student-messages.html" class="sidebar-link"><span class="sidebar-icon">💬</span> Messages</a>
+                `;
+            } else if (role === 'parent') {
+                sidebar.innerHTML = `
+                    <a href="parent-dashboard.html" class="sidebar-link"><span class="sidebar-icon">👨‍👩‍👧‍👦</span> Dashboard</a>
+                    <a href="student-fees.html" class="sidebar-link"><span class="sidebar-icon">💰</span> Fee Payment</a>
+                    <a href="student-attendance.html" class="sidebar-link"><span class="sidebar-icon">📅</span> Attendance</a>
+                    <a href="student-marks.html" class="sidebar-link"><span class="sidebar-icon">📝</span> Report Cards</a>
+                    <a href="student-messages.html" class="sidebar-link"><span class="sidebar-icon">💬</span> Messages</a>
+                `;
+            }
+        }
+
+        async function loadTimetable(studentId) {
+            await DB.ready();
+            const student = await DB.get('students', studentId);
+            if (!student) return;
+
+            // Fetch Class Name
+            const classes = await DB.getAll('classes');
+            const cls = classes.find(c => c.id === student.classId);
+            const className = cls ? cls.name : student.classId;
+            document.getElementById('classInfo').textContent = `Weekly Schedule for ${className}`;
+
+            const timetableData = await DB.getAll('timetable');
+            const subjects = await DB.getAll('subjects');
+
+            const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            const tbody = document.getElementById('timetableBody');
+
+            tbody.innerHTML = days.map(day => {
+                // Find schedule for this day
+                const schedule = timetableData.find(t =>
+                    t.classId === student.classId &&
+                    t.sectionId === student.sectionId &&
+                    t.day === day
+                );
+
+                const getPeriod = (pNum) => {
+                    if (!schedule || !schedule.periods) return '-';
+                    const p = schedule.periods.find(x => x.period === pNum);
+                    if (!p) return '-';
+
+                    const sub = subjects.find(s => s.id === p.subjectId);
+                    return `
+                        <div class="tt-subject">${sub ? sub.name : 'Sub'}</div>
+                        <div class="tt-time">${sub && sub.facultyId ? 'Fac' : 'Teacher'}</div>
+                    `;
+                };
+
+                return `
+                    <tr>
+                        <td class="day-col">${day}</td>
+                        <td>${getPeriod(1)}</td>
+                        <td>${getPeriod(2)}</td>
+                        <td class="tt-break" rowspan="1">B</td>
+                        <td>${getPeriod(3)}</td>
+                        <td>${getPeriod(4)}</td>
+                        <td class="tt-break" rowspan="1">L</td>
+                        <td>${getPeriod(5)}</td>
+                        <td>${getPeriod(6)}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            // Render Legend
+            const legend = document.getElementById('subjectLegend');
+            legend.innerHTML = '<div class="grid grid-4 gap-4">' + subjects.map(s => `
+                <div class="flex items-center gap-2">
+                    <span style="font-size:20px;">${s.icon}</span>
+                    <div>
+                        <div style="font-weight:bold;">${s.name}</div>
+                        <div style="font-size:12px; color:#666;">${s.code}</div>
+                    </div>
+                </div>
+            `).join('') + '</div>';
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Clubs - APNA SCHOOL</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <div class="animated-bg">
+        <div class="floating-shapes">
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+        </div>
+    </div>
+
+    <nav class="navbar">
+        <a href="index.html" class="navbar-brand">🎓 APNA SCHOOL</a>
+        <button class="menu-toggle" onclick="document.getElementById('mainNav').classList.toggle('active')">
+            <span></span><span></span><span></span>
+        </button>
+        <ul class="navbar-nav" id="mainNav">
+            <li><a href="index.html" class="nav-link">Home</a></li>
+            <li><a href="about.html" class="nav-link">About</a></li>
+            <li><a href="facilities.html" class="nav-link">Facilities</a></li>
+            <li><a href="clubs.html" class="nav-link active">Clubs</a></li>
+            <li><a href="events.html" class="nav-link">Events</a></li>
+            <li><a href="contact.html" class="nav-link">Contact</a></li>
+            <li><a href="login.html" class="btn btn-accent btn-sm">Login</a></li>
+        </ul>
+    </nav>
+
+    <main class="main-content no-sidebar" style="margin-top: 100px;">
+        <div class="container">
+            <div class="text-center mb-8">
+                <h1 style="font-size: var(--text-5xl); color: white; margin-bottom: var(--space-4);">School <span
+                        class="text-gradient">Clubs</span></h1>
+                <p style="color: rgba(255,255,255,0.8); font-size: var(--text-xl);">Explore your passions and develop
+                    new skills with our diverse range of clubs.</p>
+            </div>
+
+            <div class="grid grid-3 gap-6">
+                <!-- Music Club -->
+                <div class="card" style="position: relative; overflow: hidden;">
+                    <div
+                        style="position: absolute; top: 0; right: 0; background: linear-gradient(135deg, var(--color-royal-indigo), var(--color-aqua-glow)); color: white; padding: var(--space-2) var(--space-4); border-radius: 0 0 0 var(--radius-lg); font-size: var(--text-xs);">
+                        Mon & Wed</div>
+                    <div style="font-size: 3rem; margin-bottom: var(--space-4);">🎵</div>
+                    <h3 style="color: var(--color-royal-indigo); margin-bottom: var(--space-2);">Music Club</h3>
+                    <p style="color: #666; margin-bottom: var(--space-4);">Vocal and instrumental training. Learn
+                        guitar, keyboard, tabla, and more. Regular performances at school events.</p>
+                    <span class="badge badge-primary">50+ Members</span>
+                </div>
+
+                <!-- Yoga Club -->
+                <div class="card" style="position: relative; overflow: hidden;">
+                    <div
+                        style="position: absolute; top: 0; right: 0; background: linear-gradient(135deg, var(--color-success), #00B88A); color: white; padding: var(--space-2) var(--space-4); border-radius: 0 0 0 var(--radius-lg); font-size: var(--text-xs);">
+                        Daily 7 AM</div>
+                    <div style="font-size: 3rem; margin-bottom: var(--space-4);">🧘</div>
+                    <h3 style="color: var(--color-success); margin-bottom: var(--space-2);">Yoga & Wellness</h3>
+                    <p style="color: #666; margin-bottom: var(--space-4);">Physical and mental wellness through yoga,
+                        meditation, and fitness activities. Open to all students.</p>
+                    <span class="badge badge-success">80+ Members</span>
+                </div>
+
+                <!-- NCC -->
+                <div class="card" style="position: relative; overflow: hidden;">
+                    <div
+                        style="position: absolute; top: 0; right: 0; background: linear-gradient(135deg, #8B4513, #D2691E); color: white; padding: var(--space-2) var(--space-4); border-radius: 0 0 0 var(--radius-lg); font-size: var(--text-xs);">
+                        Sat 8 AM</div>
+                    <div style="font-size: 3rem; margin-bottom: var(--space-4);">🪖</div>
+                    <h3 style="color: #8B4513; margin-bottom: var(--space-2);">NCC</h3>
+                    <p style="color: #666; margin-bottom: var(--space-4);">Character building, leadership, and
+                        discipline training. Camps and adventure activities included.</p>
+                    <span class="badge badge-warning">40+ Cadets</span>
+                </div>
+
+                <!-- Coding Club -->
+                <div class="card" style="position: relative; overflow: hidden;">
+                    <div
+                        style="position: absolute; top: 0; right: 0; background: linear-gradient(135deg, var(--color-danger), #FF3333); color: white; padding: var(--space-2) var(--space-4); border-radius: 0 0 0 var(--radius-lg); font-size: var(--text-xs);">
+                        Tue & Thu</div>
+                    <div style="font-size: 3rem; margin-bottom: var(--space-4);">💻</div>
+                    <h3 style="color: var(--color-danger); margin-bottom: var(--space-2);">Coding Club</h3>
+                    <p style="color: #666; margin-bottom: var(--space-4);">Programming, hackathons, and tech projects.
+                        Learn Python, Web Development, and participate in competitions.</p>
+                    <span class="badge badge-danger">60+ Members</span>
+                </div>
+
+                <!-- Art Club -->
+                <div class="card" style="position: relative; overflow: hidden;">
+                    <div
+                        style="position: absolute; top: 0; right: 0; background: linear-gradient(135deg, var(--color-soft-purple), #B88AFF); color: white; padding: var(--space-2) var(--space-4); border-radius: 0 0 0 var(--radius-lg); font-size: var(--text-xs);">
+                        Fri 3 PM</div>
+                    <div style="font-size: 3rem; margin-bottom: var(--space-4);">🎨</div>
+                    <h3 style="color: var(--color-soft-purple); margin-bottom: var(--space-2);">Art & Craft</h3>
+                    <p style="color: #666; margin-bottom: var(--space-4);">Creative expression through painting,
+                        sketching, sculpture, and craft work. Annual art exhibitions.</p>
+                    <span class="badge badge-info">45+ Members</span>
+                </div>
+
+                <!-- Literary Society -->
+                <div class="card" style="position: relative; overflow: hidden;">
+                    <div
+                        style="position: absolute; top: 0; right: 0; background: linear-gradient(135deg, var(--color-info), #3498db); color: white; padding: var(--space-2) var(--space-4); border-radius: 0 0 0 var(--radius-lg); font-size: var(--text-xs);">
+                        Wed 4 PM</div>
+                    <div style="font-size: 3rem; margin-bottom: var(--space-4);">📚</div>
+                    <h3 style="color: var(--color-info); margin-bottom: var(--space-2);">Literary Society</h3>
+                    <p style="color: #666; margin-bottom: var(--space-4);">Debate, creative writing, poetry, and public
+                        speaking. Organize inter-school literary competitions.</p>
+                    <span class="badge badge-primary">35+ Members</span>
+                </div>
+
+                <!-- Science Club -->
+                <div class="card" style="position: relative; overflow: hidden;">
+                    <div
+                        style="position: absolute; top: 0; right: 0; background: linear-gradient(135deg, #2ecc71, #27ae60); color: white; padding: var(--space-2) var(--space-4); border-radius: 0 0 0 var(--radius-lg); font-size: var(--text-xs);">
+                        Mon 4 PM</div>
+                    <div style="font-size: 3rem; margin-bottom: var(--space-4);">🔬</div>
+                    <h3 style="color: #27ae60; margin-bottom: var(--space-2);">Science Club</h3>
+                    <p style="color: #666; margin-bottom: var(--space-4);">Experiments, projects, and science fairs.
+                        Explore physics, chemistry, and biology hands-on.</p>
+                    <span class="badge badge-success">55+ Members</span>
+                </div>
+
+                <!-- Eco Club -->
+                <div class="card" style="position: relative; overflow: hidden;">
+                    <div
+                        style="position: absolute; top: 0; right: 0; background: linear-gradient(135deg, #1abc9c, #16a085); color: white; padding: var(--space-2) var(--space-4); border-radius: 0 0 0 var(--radius-lg); font-size: var(--text-xs);">
+                        Sat 10 AM</div>
+                    <div style="font-size: 3rem; margin-bottom: var(--space-4);">🌱</div>
+                    <h3 style="color: #16a085; margin-bottom: var(--space-2);">Eco Club</h3>
+                    <p style="color: #666; margin-bottom: var(--space-4);">Environmental awareness, tree planting, and
+                        sustainability projects. Go green initiatives.</p>
+                    <span class="badge badge-success">70+ Members</span>
+                </div>
+
+                <!-- Drama Club -->
+                <div class="card" style="position: relative; overflow: hidden;">
+                    <div
+                        style="position: absolute; top: 0; right: 0; background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; padding: var(--space-2) var(--space-4); border-radius: 0 0 0 var(--radius-lg); font-size: var(--text-xs);">
+                        Thu 4 PM</div>
+                    <div style="font-size: 3rem; margin-bottom: var(--space-4);">🎭</div>
+                    <h3 style="color: #c0392b; margin-bottom: var(--space-2);">Drama & Theatre</h3>
+                    <p style="color: #666; margin-bottom: var(--space-4);">Stage performance, acting, and theatre
+                        production. Annual plays and skits at school events.</p>
+                    <span class="badge badge-danger">30+ Members</span>
+                </div>
+            </div>
+
+            <!-- Join CTA -->
+            <div class="card mt-8"
+                style="text-align: center; background: linear-gradient(135deg, var(--color-royal-indigo), var(--color-primary-light)); color: white;">
+                <h2 style="margin-bottom: var(--space-4);">Want to Join a Club?</h2>
+                <p style="opacity: 0.9; margin-bottom: var(--space-6);">Contact your class teacher or visit the Student
+                    Activities Office to register for any club.</p>
+                <a href="contact.html" class="btn btn-accent btn-lg">Contact Us</a>
+            </div>
+        </div>
+    </main>
+
+    <footer
+        style="background: rgba(10, 15, 44, 0.95); padding: var(--space-8); text-align: center; color: rgba(255,255,255,0.7); margin-top: var(--space-12);">
+        <p>© 2025 APNA SCHOOL. All Rights Reserved.</p>
+    </footer>
+</body>
+
+</html>

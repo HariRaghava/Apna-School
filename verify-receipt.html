@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receipt Verification - APNA SCHOOL</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .verify-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: var(--space-8);
+        }
+
+        .verify-box {
+            background: white;
+            border-radius: var(--radius-2xl);
+            padding: var(--space-8);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .verify-header {
+            text-align: center;
+            margin-bottom: var(--space-8);
+        }
+
+        .verify-header h1 {
+            color: var(--color-midnight);
+            font-size: var(--text-3xl);
+            margin-bottom: var(--space-2);
+        }
+
+        .verify-header p {
+            color: #666;
+        }
+
+        .search-box {
+            display: flex;
+            gap: var(--space-3);
+            margin-bottom: var(--space-6);
+        }
+
+        .search-box input {
+            flex: 1;
+            font-size: var(--text-lg);
+            padding: var(--space-4);
+        }
+
+        .result-card {
+            border-radius: var(--radius-xl);
+            padding: var(--space-6);
+            margin-top: var(--space-6);
+        }
+
+        .result-card.valid {
+            background: linear-gradient(135deg, rgba(0, 217, 165, 0.1), rgba(77, 227, 255, 0.1));
+            border: 2px solid var(--color-success);
+        }
+
+        .result-card.invalid {
+            background: linear-gradient(135deg, rgba(255, 90, 90, 0.1), rgba(255, 140, 66, 0.1));
+            border: 2px solid var(--color-danger);
+        }
+
+        .status-badge-lg {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+            padding: var(--space-3) var(--space-6);
+            border-radius: 30px;
+            font-size: var(--text-lg);
+            font-weight: bold;
+        }
+
+        .status-badge-lg.valid {
+            background: var(--color-success);
+            color: white;
+        }
+
+        .status-badge-lg.invalid {
+            background: var(--color-danger);
+            color: white;
+        }
+
+        .result-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-4);
+            margin-top: var(--space-6);
+        }
+
+        .detail-item {
+            padding: var(--space-3);
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: var(--radius-lg);
+        }
+
+        .detail-item label {
+            display: block;
+            font-size: var(--text-xs);
+            color: #666;
+            text-transform: uppercase;
+            margin-bottom: var(--space-1);
+        }
+
+        .detail-item span {
+            font-size: var(--text-lg);
+            font-weight: 600;
+            color: var(--color-midnight);
+        }
+
+        .amount-display {
+            grid-column: span 2;
+            text-align: center;
+            padding: var(--space-6);
+            background: linear-gradient(135deg, var(--color-royal-indigo), var(--color-aqua-glow));
+            border-radius: var(--radius-xl);
+            color: white;
+        }
+
+        .amount-display .label {
+            font-size: var(--text-sm);
+            opacity: 0.9;
+        }
+
+        .amount-display .value {
+            font-size: var(--text-4xl);
+            font-weight: bold;
+        }
+
+        .scan-hint {
+            text-align: center;
+            margin-top: var(--space-8);
+            padding: var(--space-6);
+            background: var(--glass-bg);
+            border-radius: var(--radius-xl);
+        }
+
+        .scan-hint h3 {
+            color: var(--color-midnight);
+            margin-bottom: var(--space-2);
+        }
+
+        .scan-hint p {
+            color: #666;
+            font-size: var(--text-sm);
+        }
+    </style>
+</head>
+
+<body style="background: linear-gradient(135deg, #f5f7fa 0%, #e4e9f2 50%, #d4dce9 100%); min-height: 100vh;">
+    <!-- Navigation -->
+    <nav class="navbar" style="background: rgba(255,255,255,0.95); box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <a href="index.html" class="navbar-brand" style="color: var(--color-midnight);">🎓 APNA SCHOOL</a>
+        <ul class="navbar-nav">
+            <li><a href="fees.html" class="btn btn-glass btn-sm" style="color: var(--color-midnight);">← Back to
+                    Fees</a></li>
+        </ul>
+    </nav>
+
+    <div class="verify-container" style="margin-top: 100px;">
+        <div class="verify-box">
+            <div class="verify-header">
+                <div style="font-size: 4rem; margin-bottom: var(--space-4);">🔍</div>
+                <h1>Receipt Verification</h1>
+                <p>Enter a receipt number to verify its authenticity</p>
+            </div>
+
+            <div class="search-box">
+                <input type="text" class="form-control" id="receiptNumber" placeholder="e.g., SCH/2025/000001"
+                    onkeypress="if(event.key==='Enter') verifyReceipt()">
+                <button class="btn btn-primary btn-lg" onclick="verifyReceipt()">Verify</button>
+            </div>
+
+            <div id="resultContainer" style="display: none;"></div>
+
+            <div class="scan-hint">
+                <h3>📱 Scan QR Code</h3>
+                <p>You can also scan the QR code on the receipt to verify automatically.</p>
+                <p style="margin-top: var(--space-2); color: var(--color-royal-indigo); font-weight: 600;">This is a
+                    public verification portal - no login required.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/db.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/receipts.js"></script>
+    <script>
+        // Check for receipt number in URL
+        document.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const receiptNo = params.get('receipt');
+            if (receiptNo) {
+                document.getElementById('receiptNumber').value = receiptNo;
+                verifyReceipt();
+            }
+        });
+
+        async function verifyReceipt() {
+            const receiptNumber = document.getElementById('receiptNumber').value.trim();
+
+            if (!receiptNumber) {
+                Utils.showToast('Please enter a receipt number', 'warning');
+                return;
+            }
+
+            const container = document.getElementById('resultContainer');
+            container.style.display = 'block';
+            container.innerHTML = '<p class="text-center text-muted" style="padding: var(--space-8);">🔄 Verifying...</p>';
+
+            try {
+                const result = await Receipts.verifyReceipt(receiptNumber);
+
+                if (!result.receipt) {
+                    container.innerHTML = `
+            <div class="result-card invalid">
+              <div style="text-align: center;">
+                <span class="status-badge-lg invalid">❌ INVALID RECEIPT</span>
+                <p style="margin-top: var(--space-4); color: #666;">
+                  No receipt found with number: <strong>${receiptNumber}</strong>
+                </p>
+                <p style="color: var(--color-danger); margin-top: var(--space-2);">
+                  This receipt does not exist in our system. Please check the number and try again.
+                </p>
+              </div>
+            </div>
+          `;
+                    return;
+                }
+
+                const receipt = result.receipt;
+                const isValid = result.valid;
+
+                container.innerHTML = `
+          <div class="result-card ${isValid ? 'valid' : 'invalid'}">
+            <div style="text-align: center; margin-bottom: var(--space-6);">
+              <span class="status-badge-lg ${isValid ? 'valid' : 'invalid'}">
+                ${isValid ? '✅ VALID RECEIPT' : '❌ ' + receipt.status.toUpperCase()}
+              </span>
+            </div>
+
+            <div class="amount-display">
+              <div class="label">Amount Paid</div>
+              <div class="value">₹${receipt.amount.toLocaleString('en-IN')}</div>
+            </div>
+
+            <div class="result-details">
+              <div class="detail-item">
+                <label>Receipt Number</label>
+                <span>${receipt.receiptNumber}</span>
+              </div>
+              <div class="detail-item">
+                <label>Payment Date</label>
+                <span>${new Date(receipt.paymentDate).toLocaleDateString('en-IN')}</span>
+              </div>
+              <div class="detail-item">
+                <label>Student Name</label>
+                <span>${receipt.studentName}</span>
+              </div>
+              <div class="detail-item">
+                <label>Roll Number</label>
+                <span>${receipt.studentRollNo}</span>
+              </div>
+              <div class="detail-item">
+                <label>Payment Mode</label>
+                <span>${receipt.paymentMode}</span>
+              </div>
+              <div class="detail-item">
+                <label>Verification Code</label>
+                <span style="font-family: monospace;">${receipt.verificationCode || '-'}</span>
+              </div>
+              ${receipt.transactionId ? `
+              <div class="detail-item" style="grid-column: span 2;">
+                <label>Transaction ID</label>
+                <span style="font-family: monospace;">${receipt.transactionId}</span>
+              </div>
+              ` : ''}
+            </div>
+
+            <div style="text-align: center; margin-top: var(--space-6);">
+              <button class="btn btn-primary" onclick="Receipts.generate('${receipt.receiptNumber}')">
+                📄 View Full Receipt
+              </button>
+            </div>
+          </div>
+        `;
+            } catch (error) {
+                container.innerHTML = `
+          <div class="result-card invalid">
+            <div style="text-align: center;">
+              <span class="status-badge-lg invalid">⚠️ ERROR</span>
+              <p style="margin-top: var(--space-4); color: var(--color-danger);">
+                ${error.message}
+              </p>
+            </div>
+          </div>
+        `;
+            }
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fee Management - APNA SCHOOL</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <div class="animated-bg">
+        <div class="floating-shapes">
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+        </div>
+    </div>
+
+    <nav class="navbar">
+        <a href="index.html" class="navbar-brand">🎓 APNA SCHOOL</a>
+        <button class="menu-toggle" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
+        <ul class="navbar-nav">
+            <li><button class="btn btn-glass btn-sm" onclick="Auth.logout()">Logout</button></li>
+        </ul>
+    </nav>
+
+    <aside class="sidebar" id="sidebar">
+        <nav class="sidebar-nav">
+            <a href="admin-dashboard.html" class="sidebar-link"><span class="sidebar-icon">📊</span> Dashboard</a>
+            <a href="students.html" class="sidebar-link"><span class="sidebar-icon">👨‍🎓</span> Students</a>
+            <a href="faculty.html" class="sidebar-link"><span class="sidebar-icon">👨‍🏫</span> Faculty</a>
+            <a href="subjects.html" class="sidebar-link"><span class="sidebar-icon">📚</span> Subjects</a>
+            <a href="attendance.html" class="sidebar-link"><span class="sidebar-icon">📅</span> Attendance</a>
+            <a href="marks.html" class="sidebar-link"><span class="sidebar-icon">📝</span> Marks</a>
+            <a href="fees.html" class="sidebar-link active"><span class="sidebar-icon">💰</span> Fees</a>
+            <a href="circulars.html" class="sidebar-link"><span class="sidebar-icon">📢</span> Circulars</a>
+            <a href="timetable.html" class="sidebar-link"><span class="sidebar-icon">📆</span> Timetable</a>
+            <a href="settings.html" class="sidebar-link"><span class="sidebar-icon">⚙️</span> Settings</a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header flex justify-between items-center">
+            <div>
+                <h1 class="page-title">Fee Management</h1>
+                <p class="page-subtitle">Track and manage student fee payments.</p>
+            </div>
+            <div class="flex gap-2">
+                <a href="verify-receipt.html" class="btn btn-accent" target="_blank">🔍 Verify Receipt</a>
+            </div>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="grid grid-4 mb-8">
+            <div class="stat-card">
+                <div class="stat-icon primary">💰</div>
+                <div class="stat-value" id="totalFees">₹0</div>
+                <div class="stat-label">Total Fees</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon success">✅</div>
+                <div class="stat-value" id="collectedFees">₹0</div>
+                <div class="stat-label">Collected</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, var(--color-danger), #FF3333);">⏳
+                </div>
+                <div class="stat-value" id="pendingFees">₹0</div>
+                <div class="stat-label">Pending</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon accent">👨‍🎓</div>
+                <div class="stat-value" id="defaulters">0</div>
+                <div class="stat-label">Defaulters</div>
+            </div>
+        </div>
+
+        <!-- Filters & Export -->
+        <div class="card mb-6">
+            <div class="flex gap-4 flex-wrap items-center justify-between">
+                <div class="flex gap-4 flex-wrap items-center">
+                    <input type="text" class="form-control" id="searchInput" placeholder="🔍 Search student..."
+                        style="max-width: 250px;" oninput="filterFees()">
+                    <select class="form-control" id="statusFilter" style="max-width: 140px;" onchange="filterFees()">
+                        <option value="">All Status</option>
+                        <option value="Paid">Paid</option>
+                        <option value="Partial">Partial</option>
+                        <option value="Pending">Pending</option>
+                    </select>
+                    <select class="form-control" id="classFilter" style="max-width: 150px;" onchange="filterFees()">
+                        <option value="">All Classes</option>
+                    </select>
+                </div>
+                <div class="flex gap-2">
+                    <button class="btn btn-glass" onclick="Exports.exportFees(null, 'csv')">📥 CSV</button>
+                    <button class="btn btn-glass" onclick="Exports.exportFees(null, 'excel')">📊 Excel</button>
+                    <button class="btn btn-glass" onclick="exportTablePDF()">📄 PDF</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fees Table -->
+        <div class="table-container">
+            <table class="data-table" id="feesDataTable">
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Class</th>
+                        <th>Total Fee</th>
+                        <th>Paid</th>
+                        <th>Balance</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="feesTable">
+                    <tr>
+                        <td colspan="7" class="text-center">Loading...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Payment Modal -->
+    <div class="modal-backdrop" id="paymentModal">
+        <div class="modal" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3 class="modal-title">💰 Record Payment</h3>
+                <button class="modal-close" onclick="closePaymentModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div id="paymentStudentInfo"
+                    style="background: linear-gradient(135deg, rgba(90, 63, 255, 0.1), rgba(77, 227, 255, 0.1)); padding: var(--space-4); border-radius: var(--radius-lg); margin-bottom: var(--space-6);">
+                    <strong id="paymentStudentName">Student Name</strong>
+                    <div style="display: flex; justify-content: space-between; margin-top: var(--space-2);">
+                        <span>Balance Due:</span>
+                        <strong id="paymentBalance" style="color: var(--color-danger);">₹0</strong>
+                    </div>
+                </div>
+                <form id="paymentForm" onsubmit="savePayment(event)">
+                    <input type="hidden" id="paymentFeeId">
+                    <div class="form-group">
+                        <label class="form-label">Payment Amount *</label>
+                        <input type="number" class="form-control" id="paymentAmount" required min="1"
+                            placeholder="Enter amount">
+                    </div>
+                    <div class="grid grid-2 gap-4">
+                        <div class="form-group">
+                            <label class="form-label">Payment Method</label>
+                            <select class="form-control" id="paymentMethod">
+                                <option value="Cash">Cash</option>
+                                <option value="Online">Online Transfer</option>
+                                <option value="UPI">UPI</option>
+                                <option value="Cheque">Cheque</option>
+                                <option value="Card">Card</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Date</label>
+                            <input type="date" class="form-control" id="paymentDate">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Transaction ID (optional)</label>
+                        <input type="text" class="form-control" id="transactionId" placeholder="For online payments">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Remarks</label>
+                        <input type="text" class="form-control" id="paymentRemarks" placeholder="Optional notes">
+                    </div>
+                    <div class="modal-footer" style="border: none; padding: 0; margin-top: var(--space-4);">
+                        <button type="button" class="btn btn-glass" onclick="closePaymentModal()">Cancel</button>
+                        <button type="submit" class="btn btn-success">💰 Record Payment</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Receipts Modal -->
+    <div class="modal-backdrop" id="receiptsModal">
+        <div class="modal" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3 class="modal-title">🧾 Payment History</h3>
+                <button class="modal-close" onclick="closeReceiptsModal()">×</button>
+            </div>
+            <div class="modal-body" id="receiptsContent"></div>
+        </div>
+    </div>
+
+    <script src="js/db.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/schema.js"></script>
+    <script src="js/exports.js"></script>
+    <script src="js/receipts.js"></script>
+    <script>
+        let allFees = [];
+        let allStudents = [];
+        let allReceipts = [];
+        let classes = [];
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!Auth.requireRole(['admin', 'developer'])) return;
+            document.getElementById('paymentDate').value = Utils.today();
+            await loadData();
+        });
+
+        async function loadData() {
+            await DB.ready();
+            allFees = await DB.getAll('fees');
+            allStudents = await DB.getAll('students');
+            allReceipts = await DB.getAll('feeReceipts');
+            classes = await DB.getAll('classes');
+
+            // Populate class filter
+            const classFilter = document.getElementById('classFilter');
+            classFilter.innerHTML = '<option value="">All Classes</option>' +
+                classes.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+
+            updateStats();
+            displayFees(allFees);
+        }
+
+        function updateStats() {
+            let total = 0, collected = 0, pending = 0, defaulters = 0;
+
+            allFees.forEach(fee => {
+                total += fee.totalAmount || 0;
+                collected += fee.paidAmount || 0;
+                if (fee.status === 'Pending') defaulters++;
+            });
+
+            pending = total - collected;
+
+            document.getElementById('totalFees').textContent = Utils.formatCurrency(total);
+            document.getElementById('collectedFees').textContent = Utils.formatCurrency(collected);
+            document.getElementById('pendingFees').textContent = Utils.formatCurrency(pending);
+            document.getElementById('defaulters').textContent = defaulters;
+        }
+
+        function displayFees(fees) {
+            const tbody = document.getElementById('feesTable');
+
+            if (fees.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No fee records found.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = fees.map(fee => {
+                const student = allStudents.find(s => s.id === fee.studentId);
+                if (!student) return '';
+
+                const cls = classes.find(c => c.id === student.classId);
+                const className = cls?.name || student.class || '-';
+                const statusClass = fee.status === 'Paid' ? 'success' : fee.status === 'Partial' ? 'warning' : 'danger';
+
+                return `
+          <tr>
+            <td>
+              <div style="display: flex; align-items: center; gap: var(--space-3);">
+                <div style="width: 36px; height: 36px; background: linear-gradient(135deg, var(--color-royal-indigo), var(--color-aqua-glow)); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                  ${Utils.getInitials(student.name)}
+                </div>
+                <div>
+                  <div style="font-weight: 600;">${student.name}</div>
+                  <small style="color: #666;">${student.rollNo}</small>
+                </div>
+              </div>
+            </td>
+            <td><span class="badge badge-primary">${className}</span></td>
+            <td><strong>${Utils.formatCurrency(fee.totalAmount)}</strong></td>
+            <td style="color: var(--color-success);">${Utils.formatCurrency(fee.paidAmount || 0)}</td>
+            <td style="color: ${fee.balance > 0 ? 'var(--color-danger)' : 'var(--color-success)'}; font-weight: bold;">
+              ${Utils.formatCurrency(fee.balance || fee.totalAmount)}
+            </td>
+            <td><span class="badge badge-${statusClass}">${fee.status}</span></td>
+            <td>
+              <div class="flex gap-1">
+                ${(fee.balance || 0) > 0 ? `<button class="btn btn-sm btn-success" onclick="openPaymentModal('${fee.id}')" title="Record Payment">💰</button>` : ''}
+                <button class="btn btn-sm btn-glass" onclick="viewReceipts('${fee.id}')" title="View History">📜</button>
+              </div>
+            </td>
+          </tr>
+        `;
+            }).join('');
+        }
+
+        function filterFees() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const status = document.getElementById('statusFilter').value;
+            const classId = document.getElementById('classFilter').value;
+
+            let filtered = allFees;
+
+            if (search) {
+                filtered = filtered.filter(fee => {
+                    const student = allStudents.find(s => s.id === fee.studentId);
+                    return student && (
+                        student.name.toLowerCase().includes(search) ||
+                        student.rollNo.toLowerCase().includes(search)
+                    );
+                });
+            }
+
+            if (status) {
+                filtered = filtered.filter(fee => fee.status === status);
+            }
+
+            if (classId) {
+                filtered = filtered.filter(fee => {
+                    const student = allStudents.find(s => s.id === fee.studentId);
+                    return student && student.classId === classId;
+                });
+            }
+
+            displayFees(filtered);
+        }
+
+        function openPaymentModal(feeId) {
+            const fee = allFees.find(f => f.id === feeId);
+            const student = allStudents.find(s => s.id === fee.studentId);
+
+            document.getElementById('paymentFeeId').value = feeId;
+            document.getElementById('paymentStudentName').textContent = student.name + ' (' + student.rollNo + ')';
+            document.getElementById('paymentBalance').textContent = Utils.formatCurrency(fee.balance || fee.totalAmount);
+            document.getElementById('paymentAmount').max = fee.balance || fee.totalAmount;
+            document.getElementById('paymentAmount').value = '';
+            document.getElementById('transactionId').value = '';
+            document.getElementById('paymentRemarks').value = '';
+
+            document.getElementById('paymentModal').classList.add('active');
+        }
+
+        function closePaymentModal() {
+            document.getElementById('paymentModal').classList.remove('active');
+        }
+
+        async function savePayment(e) {
+            e.preventDefault();
+
+            const feeId = document.getElementById('paymentFeeId').value;
+            const amount = parseInt(document.getElementById('paymentAmount').value);
+            const paymentMode = document.getElementById('paymentMethod').value;
+            const paymentDate = document.getElementById('paymentDate').value;
+            const transactionId = document.getElementById('transactionId').value.trim();
+            const remarks = document.getElementById('paymentRemarks').value.trim();
+
+            const fee = await DB.get('fees', feeId);
+            if (!fee) {
+                Utils.showToast('Fee record not found', 'error');
+                return;
+            }
+
+            const balance = fee.balance || (fee.totalAmount - (fee.paidAmount || 0));
+            if (amount > balance) {
+                Utils.showToast('Amount exceeds balance due', 'error');
+                return;
+            }
+
+            try {
+                // Use Receipts module to create receipt
+                const receipt = await Receipts.createReceipt(feeId, {
+                    amount,
+                    paymentMode,
+                    paymentDate,
+                    transactionId,
+                    remarks
+                });
+
+                Utils.showToast('Payment recorded! Receipt: ' + receipt.receiptNumber, 'success');
+                closePaymentModal();
+                await loadData();
+
+                // Generate receipt
+                Receipts.generate(receipt.receiptNumber);
+            } catch (error) {
+                Utils.showToast('Error: ' + error.message, 'error');
+            }
+        }
+
+        async function viewReceipts(feeId) {
+            const fee = allFees.find(f => f.id === feeId);
+            const student = allStudents.find(s => s.id === fee.studentId);
+            const receipts = allReceipts.filter(r => r.feeId === feeId);
+
+            const content = document.getElementById('receiptsContent');
+
+            if (receipts.length === 0) {
+                content.innerHTML = `
+          <div class="text-center text-muted" style="padding: var(--space-8);">
+            <p style="font-size: 3rem;">📭</p>
+            <p>No payments recorded yet for ${student.name}</p>
+          </div>
+        `;
+            } else {
+                content.innerHTML = `
+          <div style="margin-bottom: var(--space-4);">
+            <strong>${student.name}</strong> - ${student.rollNo}
+          </div>
+          <div style="display: flex; flex-direction: column; gap: var(--space-3);">
+            ${receipts.map(r => `
+              <div style="background: ${r.status === 'Valid' ? 'rgba(0,217,165,0.1)' : 'rgba(255,90,90,0.1)'}; border-radius: var(--radius-lg); padding: var(--space-4); display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <div style="font-weight: 600; font-family: monospace;">${r.receiptNumber}</div>
+                  <div style="font-size: var(--text-sm); color: #666;">
+                    ${new Date(r.paymentDate).toLocaleDateString('en-IN')} • ${r.paymentMode}
+                  </div>
+                </div>
+                <div style="text-align: right;">
+                  <div style="font-size: var(--text-xl); font-weight: bold; color: var(--color-success);">
+                    ${Utils.formatCurrency(r.amount)}
+                  </div>
+                  <div class="flex gap-2" style="margin-top: var(--space-1);">
+                    <button class="btn btn-sm btn-glass" onclick="Receipts.generate('${r.receiptNumber}')">📄 View</button>
+                    <a href="verify-receipt.html?receipt=${r.receiptNumber}" target="_blank" class="btn btn-sm btn-accent">🔍 Verify</a>
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+            }
+
+            document.getElementById('receiptsModal').classList.add('active');
+        }
+
+        function closeReceiptsModal() {
+            document.getElementById('receiptsModal').classList.remove('active');
+        }
+
+        function exportTablePDF() {
+            const table = document.getElementById('feesDataTable');
+            Exports.toPDF(table, 'Fee Report');
+        }
+    </script>
+</body>
+
+</html>

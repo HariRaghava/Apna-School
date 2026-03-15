@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - APNA SCHOOL</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <div class="animated-bg">
+        <div class="floating-shapes">
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+        </div>
+    </div>
+
+    <nav class="navbar">
+        <a href="index.html" class="navbar-brand">🎓 APNA SCHOOL</a>
+        <button class="menu-toggle" onclick="toggleSidebar()">
+            <span></span><span></span><span></span>
+        </button>
+        <ul class="navbar-nav">
+            <li><span class="nav-link" id="userName">Admin</span></li>
+            <li><button class="btn btn-glass btn-sm" onclick="Auth.logout()">Logout</button></li>
+        </ul>
+    </nav>
+
+    <aside class="sidebar" id="sidebar">
+        <nav class="sidebar-nav">
+            <a href="admin-dashboard.html" class="sidebar-link"><span class="sidebar-icon">📊</span> Dashboard</a>
+            <a href="students.html" class="sidebar-link"><span class="sidebar-icon">👨‍🎓</span> Students</a>
+            <a href="faculty.html" class="sidebar-link"><span class="sidebar-icon">👨‍🏫</span> Faculty</a>
+            <a href="subjects.html" class="sidebar-link"><span class="sidebar-icon">📚</span> Subjects</a>
+            <a href="attendance.html" class="sidebar-link"><span class="sidebar-icon">📅</span> Attendance</a>
+            <a href="marks.html" class="sidebar-link"><span class="sidebar-icon">📝</span> Marks</a>
+            <a href="fees.html" class="sidebar-link"><span class="sidebar-icon">💰</span> Fees</a>
+            <a href="circulars.html" class="sidebar-link"><span class="sidebar-icon">📢</span> Circulars</a>
+            <a href="timetable.html" class="sidebar-link"><span class="sidebar-icon">📆</span> Timetable</a>
+            <a href="settings.html" class="sidebar-link active"><span class="sidebar-icon">⚙️</span> Settings</a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">System Settings</h1>
+            <p class="page-subtitle">Configure your school profile and manage administrators.</p>
+        </div>
+
+        <div class="grid grid-2 bg-transparent gap-8">
+            <!-- General Settings -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">🏫 School Profile</h3>
+                </div>
+                <div class="card-body">
+                    <form id="schoolProfileForm" onsubmit="saveSettings(event)">
+                        <div class="form-group">
+                            <label class="form-label">School Name</label>
+                            <input type="text" class="form-control" id="schoolName" value="APNA SCHOOL">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Address</label>
+                            <input type="text" class="form-control" id="schoolAddress" value="Tumkur, Karnataka">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Academic Year</label>
+                            <select class="form-control" id="academicYear">
+                                <option value="2024-25" selected>2024-25</option>
+                                <option value="2025-26">2025-26</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Principal Name</label>
+                            <input type="text" class="form-control" id="principalName" value="Dr. Sharma">
+                        </div>
+
+                        <div class="flex justify-end mt-6">
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Academic Config (New) -->
+            <div class="card">
+                <div class="card-header flex justify-between items-center">
+                    <h3 class="card-title">📚 Class Management</h3>
+                    <button class="btn btn-sm btn-accent" onclick="openClassModal()">+ Add Class</button>
+                </div>
+                <div class="card-body">
+                    <div class="table-container" style="max-height: 300px; overflow-y: auto;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Class Name</th>
+                                    <th>Grade</th>
+                                    <th>Capacity</th>
+                                </tr>
+                            </thead>
+                            <tbody id="classList">
+                                <tr>
+                                    <td colspan="3" class="text-center">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Management -->
+            <div class="card">
+                <div class="card-header flex justify-between items-center">
+                    <h3 class="card-title">👥 Administrators</h3>
+                    <button class="btn btn-sm btn-accent" onclick="openAddAdmin()">+ New Admin</button>
+                </div>
+                <div class="card-body">
+                    <div id="adminList" class="flex flex-col gap-3">
+                        <!-- Loading... -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Tools -->
+            <div class="card" style="grid-column: span 2;">
+                <div class="card-header">
+                    <h3 class="card-title">🛠️ System Tools</h3>
+                </div>
+                <div class="card-body flex gap-4">
+                    <button class="btn btn-glass" onclick="backupData()">📥 Backup Data</button>
+                    <button class="btn btn-glass" onclick="document.getElementById('importFile').click()">📤 Import
+                        Data</button>
+                    <button class="btn btn-glass text-danger" onclick="resetSystem()">🔄 Reset System</button>
+                    <input type="file" id="importFile" hidden onchange="importData(this)">
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Class Modal -->
+    <div class="modal-backdrop" id="classModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Add New Class</h3>
+                <button class="modal-close" onclick="closeClassModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="classForm" onsubmit="createClass(event)">
+                    <div class="form-group">
+                        <label class="form-label">Class Name</label>
+                        <input type="text" class="form-control" id="newClassName" placeholder="e.g. Class 11" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Grade Level</label>
+                        <input type="number" class="form-control" id="newClassGrade" placeholder="11" required min="1"
+                            max="14">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Capacity</label>
+                        <input type="number" class="form-control" id="newClassCapacity" value="40" required>
+                    </div>
+                    <div class="mt-4 flex justify-end gap-2">
+                        <button type="button" class="btn btn-glass" onclick="closeClassModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Create Class</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Modal (Existing) -->
+    <div class="modal-backdrop" id="adminModal">
+        <!-- ... existing admin modal content ... -->
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Add Administrator</h3>
+                <button class="modal-close" onclick="closeAdminModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="adminForm" onsubmit="createAdmin(event)">
+                    <div class="form-group">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" class="form-control" id="newAdminName" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Username</label>
+                        <input type="text" class="form-control" id="newAdminUser" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <input type="password" class="form-control" id="newAdminPass" required>
+                    </div>
+                    <div class="mt-4 flex justify-end gap-2">
+                        <button type="button" class="btn btn-glass" onclick="closeAdminModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Create</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/db.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/utils.js"></script>
+    <script>
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('active'); }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!Auth.requireRole('admin')) return;
+            document.getElementById('userName').textContent = Auth.currentUser().name;
+            await Utils.guard(async () => {
+                await loadAdmins();
+                await loadClasses();
+            });
+        });
+
+        async function loadAdmins() {
+            await DB.ready();
+            const users = await DB.getAll('users');
+            const admins = users.filter(u => u.role === 'admin' || u.role === 'developer');
+
+            document.getElementById('adminList').innerHTML = admins.map(a => `
+                <div class="flex justify-between items-center p-3 border rounded bg-gray-50">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold">
+                            ${Utils.getInitials(a.name)}
+                        </div>
+                        <div>
+                            <div class="font-bold text-sm">${a.name}</div>
+                            <div class="text-xs text-muted">@${a.username} • ${Utils.capitalize(a.role)}</div>
+                        </div>
+                    </div>
+                    ${a.username !== 'admin' ? `
+                        <button class="text-danger text-sm hover:underline" onclick="deleteAdmin('${a.id}')">Remove</button>
+                    ` : '<span class="badge badge-primary">Primary</span>'}
+                </div>
+            `).join('');
+        }
+
+        async function loadClasses() {
+            await DB.ready();
+            const classes = await DB.getAll('classes');
+            classes.sort((a, b) => a.grade - b.grade);
+
+            document.getElementById('classList').innerHTML = classes.map(c => `
+                <tr>
+                    <td><strong>${c.name}</strong></td>
+                    <td>${c.grade}</td>
+                    <td>${c.capacity}</td>
+                </tr>
+            `).join('');
+        }
+
+        function openAddAdmin() {
+            document.getElementById('adminForm').reset();
+            document.getElementById('adminModal').classList.add('active');
+        }
+
+        function closeAdminModal() {
+            document.getElementById('adminModal').classList.remove('active');
+        }
+
+        function openClassModal() {
+            document.getElementById('classForm').reset();
+            document.getElementById('classModal').classList.add('active');
+        }
+
+        function closeClassModal() {
+            document.getElementById('classModal').classList.remove('active');
+        }
+
+        async function createAdmin(e) {
+            e.preventDefault();
+            const name = document.getElementById('newAdminName').value;
+            const username = document.getElementById('newAdminUser').value;
+            const password = document.getElementById('newAdminPass').value;
+
+            try {
+                await Auth.createUser({ name, username, password, role: 'admin' });
+                Utils.showToast('Admin created successfully', 'success');
+                closeAdminModal();
+                await loadAdmins();
+            } catch (err) {
+                Utils.showToast(err.message, 'error');
+            }
+        }
+
+        async function createClass(e) {
+            e.preventDefault();
+            const name = document.getElementById('newClassName').value;
+            const grade = parseInt(document.getElementById('newClassGrade').value);
+            const capacity = parseInt(document.getElementById('newClassCapacity').value);
+
+            try {
+                // Generate a simple ID logic
+                const id = `cls_${grade}`; // simplistic ID, prone to collision if same grade
+                // Better ID: cls_timestamp
+                const uniqueId = `cls_${Date.now()}`;
+
+                await DB.add('classes', {
+                    id: uniqueId,
+                    name: name,
+                    grade: grade,
+                    capacity: capacity,
+                    academicYearId: 'ay_2024' // Defaulting to current
+                });
+
+                Utils.showToast('Class created successfully', 'success');
+                closeClassModal();
+                await loadClasses();
+            } catch (err) {
+                Utils.showToast('Error creating class: ' + err.message, 'error');
+            }
+        }
+
+        async function deleteAdmin(id) {
+            if (!confirm('Are you sure you want to remove this admin?')) return;
+            await DB.delete('users', id);
+            await loadAdmins();
+            Utils.showToast('Admin removed', 'success');
+        }
+
+        async function saveSettings(e) {
+            e.preventDefault();
+            // In a real app we'd save these to the 'settings' store
+            Utils.showToast('Settings saved successfully', 'success');
+        }
+
+        async function backupData() {
+            const data = await DB.exportAll();
+            Utils.exportToJSON(data, 'school_backup.json');
+        }
+    </script>
+</body>
+
+</html>

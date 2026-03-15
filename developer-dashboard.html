@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Developer Dashboard - APNA SCHOOL</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0A0F2C 0%, #1a1a2e 50%, #16213e 100%);
+            color: #e0e0e0;
+        }
+
+        .dev-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .dev-card .card-title {
+            color: #4DE3FF;
+        }
+
+        .code-block {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: var(--radius-md);
+            padding: var(--space-4);
+            font-family: 'Fira Code', monospace;
+            font-size: 13px;
+            color: #00ff9d;
+            overflow-x: auto;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .log-entry {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 4px 0;
+            display: flex;
+            gap: 10px;
+        }
+
+        .log-time {
+            color: #888;
+            white-space: nowrap;
+        }
+
+        .log-msg {
+            color: #e0e0e0;
+        }
+
+        .stat-value.text-white {
+            color: #fff !important;
+        }
+
+        .text-muted {
+            color: #888 !important;
+        }
+
+        .btn-glass-dev {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-glass-dev:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Custom scrollbar for logs */
+        #consoleLog::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #consoleLog::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        #consoleLog::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="animated-bg">
+        <div class="floating-shapes">
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+        </div>
+    </div>
+
+    <nav class="navbar" style="background: rgba(10, 15, 44, 0.8); border-bottom: 1px solid rgba(255,255,255,0.1);">
+        <a href="index.html" class="navbar-brand" style="color: white;">🎓 APNA SCHOOL <span
+                style="font-size: 0.8em; color: #4DE3FF; background: rgba(77, 227, 255, 0.1); padding: 2px 8px; border-radius: 4px; border: 1px solid #4DE3FF;">DEV</span></a>
+        <ul class="navbar-nav">
+            <li><span class="nav-link text-white" id="userName">Developer</span></li>
+            <li><button class="btn btn-glass-dev btn-sm" onclick="Auth.logout()">Logout</button></li>
+        </ul>
+    </nav>
+
+    <main class="main-content no-sidebar" style="max-width: 1400px; margin: 0 auto;">
+        <div class="page-header flex justify-between items-end">
+            <div>
+                <h1 class="page-title text-white">System Dashboard</h1>
+                <p class="page-subtitle" style="color: #aaa;">Database management and system diagnostics.</p>
+            </div>
+            <div class="code-block" style="padding: 8px 16px;">
+                v2.0.0-enterprise
+            </div>
+        </div>
+
+        <!-- Database Stats -->
+        <div class="grid grid-4 mb-8">
+            <div class="stat-card dev-card">
+                <div class="stat-icon primary">👥</div>
+                <div class="stat-value text-white" id="userCount">0</div>
+                <div class="stat-label text-muted">Total Users</div>
+            </div>
+            <div class="stat-card dev-card">
+                <div class="stat-icon accent">👨‍🎓</div>
+                <div class="stat-value text-white" id="studentCount">0</div>
+                <div class="stat-label text-muted">Active Students</div>
+            </div>
+            <div class="stat-card dev-card">
+                <div class="stat-icon success">📅</div>
+                <div class="stat-value text-white" id="attendanceCount">0</div>
+                <div class="stat-label text-muted">Attendance Records</div>
+            </div>
+            <div class="stat-card dev-card">
+                <div class="stat-icon purple">💾</div>
+                <div class="stat-value text-white" id="storageUsage">0 KB</div>
+                <div class="stat-label text-muted">Est. Storage</div>
+            </div>
+        </div>
+
+        <div class="grid grid-2 gap-6">
+            <!-- Quick Actions -->
+            <div class="card dev-card">
+                <div class="card-header">
+                    <h3 class="card-title">⚡ Control Center</h3>
+                </div>
+                <div class="grid grid-3 gap-4">
+                    <button class="btn btn-success" onclick="seedData()">
+                        <span>🌱 Seed Enterprise Data</span>
+                    </button>
+                    <button class="btn btn-danger" onclick="clearData()">
+                        <span>🗑️ format C: (Clear DB)</span>
+                    </button>
+                    <button class="btn btn-primary" onclick="exportData()">
+                        <span>📦 Dump Database (JSON)</span>
+                    </button>
+                    <button class="btn btn-primary" onclick="generateCredentialsPDF()">
+                        <span>🔑 Export Credentials (PDF)</span>
+                    </button>
+                    <button class="btn btn-accent" onclick="viewStats()">
+                        <span>🔄 Refresh Properties</span>
+                    </button>
+                    <button class="btn btn-glass-dev" onclick="runDiagnostics()">
+                        <span>🏥 Run Diagnostics</span>
+                    </button>
+                    <button class="btn btn-glass-dev" onclick="forceUpgrade()">
+                        <span>⬆️ Force Schema Upgrade</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Console Log -->
+            <div class="card dev-card">
+                <div class="card-header flex justify-between items-center">
+                    <h3 class="card-title">👨‍💻 System Log</h3>
+                    <button class="btn btn-sm btn-glass-dev" onclick="clearLog()">Clear</button>
+                </div>
+                <div class="code-block" id="consoleLog" style="height: 250px; overflow-y: auto;">
+                    <div class="log-entry"><span class="log-time">[System]</span><span class="log-msg">Dashboard
+                            initialized...</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Database Stores -->
+        <div class="card dev-card mt-8">
+            <div class="card-header flex justify-between items-center">
+                <h3 class="card-title">🗄️ IndexedDB Stores</h3>
+                <span class="badge badge-primary">ApnaSchoolDB v2</span>
+            </div>
+            <div class="table-container" style="box-shadow: none; background: transparent;">
+                <table class="data-table" style="color: #ddd;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                            <th style="color: #aaa;">Store Name</th>
+                            <th style="color: #aaa;">Record Count</th>
+                            <th style="color: #aaa;">Last Modified</th>
+                            <th style="color: #aaa;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="storesTable">
+                        <tr>
+                            <td colspan="4" class="text-center">Loading schema...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="js/db.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/seed.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!Auth.requireRole('developer')) return;
+
+            const user = Auth.currentUser();
+            document.getElementById('userName').textContent = user.name;
+
+            log('Connecting to IndexedDB...');
+            await loadStats();
+            log('System ready.');
+        });
+
+        async function loadStats() {
+            try {
+                await DB.ready();
+                const stats = await DB.getStats();
+
+                // Update specific counters
+                document.getElementById('userCount').textContent = stats.users || 0;
+                document.getElementById('studentCount').textContent = stats.students || 0;
+                document.getElementById('attendanceCount').textContent = stats.attendance || 0;
+
+                // Calc roughly storage
+                const totalRecords = Object.values(stats).reduce((a, b) => a + b, 0);
+                const estSize = (totalRecords * 0.5).toFixed(1); // Rough avg 0.5kb per record
+                document.getElementById('storageUsage').textContent = estSize + ' KB';
+
+                // Stores Table
+                const storesTable = document.getElementById('storesTable');
+                storesTable.innerHTML = Object.entries(stats).length === 0
+                    ? '<tr><td colspan="4" class="text-center">Database empty</td></tr>'
+                    : Object.entries(stats).sort().map(([store, count]) => `
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <td><code style="color: #4DE3FF;">${store}</code></td>
+                        <td>${count}</td>
+                        <td class="text-muted">Now</td>
+                        <td>
+                            <button class="btn btn-sm btn-glass-dev" onclick="viewStore('${store}')">Inspect</button>
+                        </td>
+                    </tr>
+                `).join('');
+
+            } catch (e) {
+                log('Error loading stats: ' + e.message, 'error');
+            }
+        }
+
+        async function seedData() {
+            if (!confirm('This will inject sample data. Continue?')) return;
+
+            log('Starting seed process...');
+            try {
+                const result = await Seed.populateAll();
+                if (result.success) {
+                    log('Seed completed successfully.', 'success');
+                    Utils.showToast('Seed Complete', 'success');
+                    await loadStats();
+                } else {
+                    log('Seed skipped: ' + result.message, 'warning');
+                    Utils.showToast(result.message, 'warning');
+                }
+            } catch (e) {
+                log('Seed failed: ' + e.message, 'error');
+            }
+        }
+
+        async function clearData() {
+            const code = Math.floor(1000 + Math.random() * 9000);
+            const input = prompt(`DANGER ZONE: This will wipe the database.\nType "${code}" to confirm delete:`);
+
+            if (input == code) {
+                log('Nuking database...');
+                await DB.clearAll();
+                log('Database cleared.', 'success');
+                Utils.showToast('Database Wiped', 'success');
+                await loadStats();
+            }
+        }
+
+        async function exportData() {
+            log('Exporting all stores...');
+            const data = await DB.exportAll();
+            Utils.exportToJSON(data, `apna_school_dump_${Utils.today()}.json`);
+            log('Export download started.', 'success');
+        }
+
+        async function viewStats() {
+            log('Refreshing metrics...');
+            await loadStats();
+        }
+
+        async function generateCredentialsPDF() {
+            log('Generating credentials PDF...');
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Header
+            doc.setFillColor(90, 63, 255);
+            doc.rect(0, 0, 210, 40, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(22);
+            doc.text('A P N A   S C H O O L', 105, 20, { align: 'center' });
+            doc.setFontSize(12);
+            doc.text('Demo Credentials Report', 105, 30, { align: 'center' });
+
+            doc.setTextColor(0, 0, 0);
+
+            const users = await DB.getAll('users');
+
+            // Helper to add table
+            const addTable = (title, roleFilter, defaultPass, yPos) => {
+                const roleUsers = users.filter(u => roleFilter(u.role));
+
+                if (roleUsers.length === 0) return yPos;
+
+                doc.setFontSize(14);
+                doc.setTextColor(90, 63, 255);
+                doc.text(title, 14, yPos);
+
+                // Add "Me" specifically for developer export
+                if (title === 'Developer Team' && !roleUsers.some(u => u.username === 'dev')) {
+                    // Should be there if seeded, but just in case
+                }
+
+                const tableData = roleUsers.map(u => [
+                    u.name,
+                    u.username,
+                    u.role.toUpperCase(),
+                    u.role.toUpperCase(),
+                    // Logic to show password hint
+                    u.username === 'dev' ? 'dev123' :
+                        u.username === 'principal' ? 'principal123' :
+                            u.username === 'admin' ? 'admin123' :
+                                u.role === 'student' ? 'student123' :
+                                    u.role === 'parent' ? 'parent123' :
+                                        u.role === 'faculty' ? 'faculty123' : '******'
+                ]);
+
+                doc.autoTable({
+                    startY: yPos + 5,
+                    head: [['Name', 'Username', 'Role', 'Password']],
+                    body: tableData,
+                    theme: 'grid',
+                    headStyles: { fillColor: [90, 63, 255] },
+                    styles: { fontSize: 10 }
+                });
+
+                return doc.lastAutoTable.finalY + 15;
+            };
+
+            let y = 50;
+
+            // Summary
+            doc.setFontSize(10);
+            doc.setTextColor(100);
+            doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 45);
+            doc.text(`Total Users: ${users.length}`, 180, 45, { align: 'right' });
+
+            // Admin & Principal & Developers
+            y = addTable('Admin & Management', r => ['admin', 'developer'].includes(r) || users.find(u => u.role === 'admin' && u.username === 'principal'), null, y);
+
+            // Logic for passwords in custom table function needs to be robust
+            // We'll override the previous simple addTable with a more robust one inside the function if needed, 
+            // but for now let's just use the lambda logic well.
+
+            // Faculty
+            if (y > 250) { doc.addPage(); y = 20; }
+            y = addTable('Faculty Members', r => r === 'faculty', 'faculty123', y);
+
+            // Students
+            if (y > 250) { doc.addPage(); y = 20; }
+            y = addTable('Students', r => r === 'student', 'student123', y);
+
+            // Parents
+            if (y > 250) { doc.addPage(); y = 20; }
+            addTable('Parents', r => r === 'parent', 'parent123', y);
+
+            doc.save('ApnaSchool_Credentials.pdf');
+            log('PDF downloaded.', 'success');
+            Utils.showToast('Credentials PDF downloaded', 'success');
+        }
+
+        async function runDiagnostics() {
+            log('Running integrity checks...');
+            const students = await DB.getAll('students');
+            const classes = await DB.getAll('classes');
+
+            let issues = 0;
+
+            // Check orphans
+            for (const s of students) {
+                if (!classes.find(c => c.id === s.classId)) {
+                    log(`[WARN] Orphan student: ${s.name} (ClassID: ${s.classId} missing)`);
+                    issues++;
+                }
+            }
+
+            if (issues === 0) log('Integrity check passed. No orphans found.', 'success');
+            else log(`Diagnostics finished. ${issues} issues found.`, 'warning');
+        }
+
+        async function forceUpgrade() {
+            // Reload with version check skip or similar in real app
+            location.reload();
+        }
+
+        async function viewStore(storeName) {
+            const data = await DB.getAll(storeName);
+            console.table(data);
+            log(`Dumped ${data.length} records from ${storeName} to DevTools Console.`);
+            Utils.showToast('Check Console (F12)', 'info');
+        }
+
+        function log(msg, type = 'info') {
+            const logEl = document.getElementById('consoleLog');
+            const time = new Date().toLocaleTimeString();
+            let color = '#e0e0e0';
+            if (type === 'error') color = '#ff5555';
+            if (type === 'success') color = '#55ff55';
+            if (type === 'warning') color = '#ffff55';
+
+            logEl.innerHTML += `
+                <div class="log-entry">
+                    <span class="log-time">[${time}]</span>
+                    <span class="log-msg" style="color: ${color}">${msg}</span>
+                </div>
+            `;
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('consoleLog').innerHTML = '';
+        }
+    </script>
+</body>
+
+</html>
